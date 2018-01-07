@@ -16,6 +16,7 @@
     <string name="action_sign_in_short">Create</string>
 
     <!-- String related to sending -->
+    <string name="empty_balance">Unable to send, wallet is empty</string>
     <string name="prompt_to">To</string>
     <string name="action_send">Send</string>
 

@@ -6,10 +6,11 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -20,6 +21,7 @@ import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
+import com.wallet.crypto.trustapp.util.PriceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModel;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
@@ -40,6 +42,9 @@ public class SendActivity extends BaseActivity {
 
     private EditText toAddressText;
     private EditText amountText;
+    private EditText usdAmountText;
+    private TextWatcher amountTextWatcher;
+    private TextWatcher usdAmountTextWatcher;
 
     // In case we're sending tokens
     private boolean sendingTokens = false;
@@ -48,6 +53,7 @@ public class SendActivity extends BaseActivity {
     private String symbol;
     private TextInputLayout toInputLayout;
     private TextInputLayout amountInputLayout;
+    private TextInputLayout usdAmountInputLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +71,10 @@ public class SendActivity extends BaseActivity {
         toAddressText = findViewById(R.id.send_to_address);
         amountInputLayout = findViewById(R.id.amount_input_layout);
         amountText = findViewById(R.id.send_amount);
+        usdAmountInputLayout = findViewById(R.id.usd_amount_input_layout);
+        usdAmountText = findViewById(R.id.usd_send_amount);
+
+        initializeFieldListeners();
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
@@ -73,7 +83,8 @@ public class SendActivity extends BaseActivity {
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
 
         setTitle(getString(R.string.title_send) + " " + symbol);
-        amountInputLayout.setHint(getString(R.string.hint_amount) + " " + symbol);
+        amountInputLayout.setHint(getString(R.string.hint_amount) + " (" + symbol + ")");
+        usdAmountInputLayout.setHint(getString(R.string.hint_amount) + " (" + C.USD_SYMBOL + ")");
 
         // Populate to address if it has been passed forward
         String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
@@ -86,6 +97,74 @@ public class SendActivity extends BaseActivity {
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+    }
+
+    private void initializeFieldListeners() {
+        amountText.setOnFocusChangeListener((view, b) -> {
+            if (b) {
+                amountText.addTextChangedListener(amountTextWatcher);
+            } else {
+                amountText.removeTextChangedListener(amountTextWatcher);
+            }
+        });
+
+        usdAmountText.setOnFocusChangeListener((view, b) -> {
+            if (b) {
+                usdAmountText.addTextChangedListener(usdAmountTextWatcher);
+            } else {
+                usdAmountText.removeTextChangedListener(usdAmountTextWatcher);
+            }
+        });
+
+        amountTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                try {
+                    if (charSequence.length() > 0) {
+                        usdAmountText.setText(BalanceUtils.ethToUsd(PriceUtils.get().toString(), charSequence.toString()));
+                    } else {
+                        usdAmountText.getText().clear();
+                    }
+                } catch (NumberFormatException e) {
+                    Log.e("SEND", e.getMessage(), e);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        };
+
+        usdAmountTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                try {
+                    if (charSequence.length() > 0) {
+                        amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), PriceUtils.get().toString()));
+                    } else {
+                        amountText.getText().clear();
+                    }
+                } catch (NumberFormatException e) {
+                    Log.e("SEND", e.getMessage(), e);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        };
     }
 
     @Override

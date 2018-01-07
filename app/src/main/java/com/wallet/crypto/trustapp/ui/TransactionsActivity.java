@@ -27,6 +27,7 @@ import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.widget.adapter.TransactionsAdapter;
+import com.wallet.crypto.trustapp.util.PriceUtils;
 import com.wallet.crypto.trustapp.util.RootUtil;
 import com.wallet.crypto.trustapp.viewmodel.BaseNavigationActivity;
 import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModel;
@@ -35,6 +36,7 @@ import com.wallet.crypto.trustapp.widget.DepositView;
 import com.wallet.crypto.trustapp.widget.EmptyTransactionsView;
 import com.wallet.crypto.trustapp.widget.SystemView;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -52,6 +54,8 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     private SystemView systemView;
     private TransactionsAdapter adapter;
     private Dialog dialog;
+
+    private boolean isBalanceEmpty;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -162,7 +166,12 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 return true;
             }
             case R.id.action_send: {
-                viewModel.showSend(this);
+                if (!isBalanceEmpty) {
+                    viewModel.showSend(this);
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.empty_balance), Toast.LENGTH_SHORT).show();
+                }
+
                 return true;
             }
         }
@@ -182,6 +191,23 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         } else {
             actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
             actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
+
+            if (new BigDecimal(balance.get(C.USD_SYMBOL)).compareTo(BigDecimal.ZERO) == 0) {
+                isBalanceEmpty = true;
+            } else {
+                isBalanceEmpty = false;
+                setCurrentPrice(balance, networkInfo);
+            }
+
+        }
+    }
+
+    private void setCurrentPrice(Map<String, String> balance, NetworkInfo networkInfo) {
+        BigDecimal usdValue = new BigDecimal(balance.get(C.USD_SYMBOL));
+        BigDecimal ethAmount = new BigDecimal(balance.get(networkInfo.symbol));
+        if (ethAmount.compareTo(BigDecimal.ZERO) != 0 || usdValue.compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal ethPrice = usdValue.divide(ethAmount);
+            PriceUtils.set(ethPrice);
         }
     }
 

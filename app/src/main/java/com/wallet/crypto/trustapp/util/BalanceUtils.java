@@ -26,6 +26,13 @@ public class BalanceUtils {
         return usd.toString();
     }
 
+    public static String usdToEth(String usdValue, String ethPrice) {
+        BigDecimal usdVal = new BigDecimal(usdValue);
+        if (usdVal.compareTo(BigDecimal.ZERO) == 0) return "";
+        BigDecimal eth = new BigDecimal(usdValue).divide(new BigDecimal(ethPrice), 4, RoundingMode.HALF_EVEN);
+        return eth.toString();
+    }
+
     public static String EthToWei(String eth) throws Exception {
         BigDecimal wei = new BigDecimal(eth).multiply(new BigDecimal(weiInEth));
         return wei.toBigInteger().toString();
