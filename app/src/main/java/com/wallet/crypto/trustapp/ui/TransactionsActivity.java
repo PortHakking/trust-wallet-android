@@ -196,18 +196,8 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 isBalanceEmpty = true;
             } else {
                 isBalanceEmpty = false;
-                setCurrentPrice(balance, networkInfo);
             }
 
-        }
-    }
-
-    private void setCurrentPrice(Map<String, String> balance, NetworkInfo networkInfo) {
-        BigDecimal usdValue = new BigDecimal(balance.get(C.USD_SYMBOL));
-        BigDecimal ethAmount = new BigDecimal(balance.get(networkInfo.symbol));
-        if (ethAmount.compareTo(BigDecimal.ZERO) != 0 || usdValue.compareTo(BigDecimal.ZERO) != 0) {
-            BigDecimal ethPrice = usdValue.divide(ethAmount);
-            PriceUtils.set(ethPrice);
         }
     }
 

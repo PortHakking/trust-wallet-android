@@ -4,7 +4,9 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
+import com.wallet.crypto.trustapp.util.PriceUtils;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +42,7 @@ public class GetDefaultWalletBalance {
                         .flatMap(ticker -> {
                             String ethBallance = balances.get(ethereumNetworkRepository.getDefaultNetwork().symbol);
                             balances.put(USD_SYMBOL, BalanceUtils.ethToUsd(ticker.price, ethBallance));
+                            PriceUtils.set(new BigDecimal(ticker.price));
                             return Single.just(balances);
                         })
                         .onErrorResumeNext(throwable -> Single.just(balances)))
