@@ -11,6 +11,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.view.View;
 
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
@@ -36,7 +38,10 @@ public class SettingsFragment extends PreferenceFragment
     public void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+    }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.fragment_settings);
         final Preference wallets = findPreference("pref_wallet");
@@ -48,12 +53,14 @@ public class SettingsFragment extends PreferenceFragment
 
         findDefaultWalletInteract
                 .find()
-                .subscribe(wallet -> PreferenceManager
-                        .getDefaultSharedPreferences(getActivity())
-                        .edit()
-                        .putString("pref_wallet", wallet.address)
-                        .apply());
-
+                .subscribe(wallet -> {
+                    PreferenceManager
+                            .getDefaultSharedPreferences(view.getContext())
+                            .edit()
+                            .putString("pref_wallet", wallet.address)
+                            .apply();
+                    wallets.setSummary(wallet.address);
+                }, t -> {});
 
         final ListPreference listPreference = (ListPreference) findPreference("pref_rpcServer");
         // THIS IS REQUIRED IF YOU DON'T HAVE 'entries' and 'entryValues' in your XML
@@ -70,10 +77,10 @@ public class SettingsFragment extends PreferenceFragment
         preferences
                 .registerOnSharedPreferenceChangeListener(SettingsFragment.this);
         final Preference rate = findPreference("pref_rate");
-            rate.setOnPreferenceClickListener(preference -> {
-                rateThisApp();
-                return false;
-            });
+        rate.setOnPreferenceClickListener(preference -> {
+            rateThisApp();
+            return false;
+        });
 
         final Preference twitter = findPreference("pref_twitter");
         twitter.setOnPreferenceClickListener(preference -> {
@@ -91,6 +98,13 @@ public class SettingsFragment extends PreferenceFragment
             return false;
         });
 
+        final Preference facebook = findPreference("pref_facebook");
+        facebook.setOnPreferenceClickListener(preference -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/trustwalletapp"));
+            startActivity(intent);
+            return false;
+        });
+
         final Preference donate = findPreference("pref_donate");
         donate.setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(getActivity(), SendActivity.class);
@@ -103,7 +117,7 @@ public class SettingsFragment extends PreferenceFragment
         email.setOnPreferenceClickListener(preference -> {
 
             Intent mailto = new Intent(Intent.ACTION_SENDTO);
-            mailto.setType("message/rfc822") ; // use from live device
+            mailto.setType("message/rfc822"); // use from live device
             mailto.setData(Uri.parse("mailto:support@trustwalletapp.com")
                     .buildUpon()
                     .appendQueryParameter("subject", "Android support question")
@@ -121,12 +135,12 @@ public class SettingsFragment extends PreferenceFragment
         // to taken back to our application, we need to add following flags to intent.
         goToMarket.addFlags(
                 Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            try {
-                startActivity(goToMarket);
-            } catch (ActivityNotFoundException e) {
-                startActivity(new Intent(Intent.ACTION_VIEW,
+        try {
+            startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://play.google.com/store/apps/details?id=" + getActivity().getPackageName())));
-            }
+        }
 
     }
 
@@ -148,26 +162,6 @@ public class SettingsFragment extends PreferenceFragment
     }
 
     private void setRpcServerPreferenceData(ListPreference lp) {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        CharSequence[] entries = new CharSequence[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            entries[ii] = networks[ii].name;
-        }
-
-        CharSequence[] entryValues = new CharSequence[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            entryValues[ii] = networks[ii].name;
-        }
-
-        String currentValue = ethereumNetworkRepository.getDefaultNetwork().name;
-
-        lp.setEntries(entries);
-        lp.setDefaultValue(currentValue);
-        lp.setValue(currentValue);
-        lp.setSummary(currentValue);
-        lp.setEntryValues(entryValues);
-    }
-    private void setWalletPreferenceData(ListPreference lp) {
         NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
         CharSequence[] entries = new CharSequence[networks.length];
         for (int ii = 0; ii < networks.length; ii++) {

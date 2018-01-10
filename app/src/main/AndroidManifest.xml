@@ -44,7 +44,7 @@
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".ui.TransactionDetailActivity"
-            android:label="@string/action_transaction_detail" />
+            android:label="@string/title_transaction_details" />
         <activity
             android:name=".ui.MyAddressActivity"
             android:label="@string/title_my_address" />
@@ -59,6 +59,11 @@
         <activity
             android:name=".ui.ConfirmationActivity"
             android:label="@string/title_activity_confirmation" />
+
+        <activity
+            android:name=".ui.AddTokenActivity"
+            android:label="@string/title_add_token"
+            />
 
         <activity
             android:name=".ui.barcode.BarcodeCaptureActivity"

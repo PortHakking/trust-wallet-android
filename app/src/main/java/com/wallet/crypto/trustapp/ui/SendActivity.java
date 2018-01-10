@@ -28,6 +28,8 @@ import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
 
 import org.ethereum.geth.Address;
 
+import java.math.BigInteger;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
@@ -77,7 +79,7 @@ public class SendActivity extends BaseActivity {
         initializeFieldListeners();
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
+        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
@@ -219,7 +221,7 @@ public class SendActivity extends BaseActivity {
             inputValid = false;
         }
         final String amount = amountText.getText().toString();
-        if (!isValidEthAmount(amount)) {
+        if (!isValidAmount(amount)) {
             amountInputLayout.setError(getString(R.string.error_invalid_amount));
             inputValid = false;
         }
@@ -228,7 +230,11 @@ public class SendActivity extends BaseActivity {
             return;
         }
 
-        viewModel.openConfirmation(this, to, amount, contractAddress, decimals, symbol, sendingTokens);
+        toInputLayout.setErrorEnabled(false);
+        amountInputLayout.setErrorEnabled(false);
+
+        BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amount, decimals);
+        viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens);
     }
 
     boolean isAddressValid(String address) {
@@ -240,7 +246,7 @@ public class SendActivity extends BaseActivity {
         }
     }
 
-    boolean isValidEthAmount(String eth) {
+    boolean isValidAmount(String eth) {
         try {
             String wei = BalanceUtils.EthToWei(eth);
             return wei != null;

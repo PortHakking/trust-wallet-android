@@ -45,17 +45,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 
     @Override
 	public Observable<Transaction[]> fetchTransaction(Wallet wallet) {
-        return Observable.create(e -> {
-            Transaction[] transactions = transactionLocalSource.fetchTransaction(wallet).blockingGet();
-            if (transactions != null && transactions.length > 0) {
-                e.onNext(transactions);
-            }
-            transactions = blockExplorerClient.fetchTransactions(wallet.address).blockingFirst();
-            transactionLocalSource.clear();
-            transactionLocalSource.putTransactions(wallet, transactions);
-            e.onNext(transactions);
-            e.onComplete();
-        });
+	    return Single.merge(
+	            transactionLocalSource.fetchTransaction(wallet), fetchAndCacheFromNetwork(wallet))
+                .toObservable();
     }
 
 	@Override
@@ -73,7 +65,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, String toAddress, String wei, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
+	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
 		final Web3j web3j = Web3jFactory.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
 
 		return Single.fromCallable(() -> {
@@ -82,7 +74,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					.send();
 			return ethGetTransactionCount.getTransactionCount();
 		})
-		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, wei, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
+		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
 		.flatMap(signedMessage -> Single.fromCallable( () -> {
 			EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
@@ -93,6 +85,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 			return raw.getTransactionHash();
 		})).subscribeOn(Schedulers.io());
 	}
+
+	private Single<Transaction[]> fetchAndCacheFromNetwork(Wallet wallet) {
+        return Single.fromObservable(
+                blockExplorerClient.fetchTransactions(wallet.address)
+                        .doOnNext(transactions -> transactionLocalSource.putTransactions(wallet, transactions)));
+    }
 
     private void onNetworkChanged(NetworkInfo networkInfo) {
         transactionLocalSource.clear();

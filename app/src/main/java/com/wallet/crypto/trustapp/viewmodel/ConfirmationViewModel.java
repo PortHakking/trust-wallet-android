@@ -3,14 +3,13 @@ package com.wallet.crypto.trustapp.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
-import android.content.Intent;
 
 import com.wallet.crypto.trustapp.entity.GasSettings;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.CreateTransactionInteract;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.repository.TokenRepository;
 import com.wallet.crypto.trustapp.router.GasSettingsRouter;
 
 import java.math.BigInteger;
@@ -26,7 +25,9 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     private final GasSettingsRouter gasSettingsRouter;
 
-    public ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
+    private boolean confirmationForTokenTransfer = false;
+
+    ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
                                  CreateTransactionInteract createTransactionInteract,
                                  GasSettingsRouter gasSettingsRouter) {
@@ -36,10 +37,18 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.gasSettingsRouter = gasSettingsRouter;
     }
 
-    public void createTransaction(String from, String to, String amount, BigInteger gasPrice, BigInteger gasLimit) {
+    public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPrice, gasLimit)
+                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null)
+                .subscribe(this::onCreateTransaction, this::onError);
+    }
+
+    public void createTokenTransfer(String from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
+        progress.postValue(true);
+        final byte[] data = TokenRepository.createTokenTransferData(to, amount);
+        disposable = createTransactionInteract
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -51,9 +60,12 @@ public class ConfirmationViewModel extends BaseViewModel {
         return gasSettings;
     }
 
-    public LiveData<String> sendTransaction() { return newTransaction; }
+    public LiveData<String> sendTransaction() {
+        return newTransaction;
+    }
 
-    public void prepare() {
+    public void prepare(boolean confirmationForTokenTransfer) {
+        this.confirmationForTokenTransfer = confirmationForTokenTransfer;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -67,12 +79,14 @@ public class ConfirmationViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         if (gasSettings.getValue() == null) {
-            onGasSettings(fetchGasSettingsInteract.fetch());
+            disposable = fetchGasSettingsInteract
+                    .fetch(confirmationForTokenTransfer)
+                    .subscribe(this::onGasSettings, this::onError);
         }
     }
 
     private void onGasSettings(GasSettings gasSettings) {
-        this.gasSettings.setValue(gasSettings);
+        this.gasSettings.postValue(gasSettings);
     }
 
     public void openGasSettings(Activity context) {

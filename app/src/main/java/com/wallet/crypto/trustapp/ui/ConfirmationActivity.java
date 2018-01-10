@@ -46,7 +46,10 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView networkFeeText;
     private Button sendButton;
 
-    private String amount;
+    private BigInteger amount;
+    private int decimals;
+    private String contractAddress;
+    private boolean confirmationForTokenTransfer = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,13 +71,17 @@ public class ConfirmationActivity extends BaseActivity {
         sendButton.setOnClickListener(view -> onSend());
 
         String toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
-        amount = getIntent().getStringExtra(C.EXTRA_AMOUNT);
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        amount = new BigInteger(getIntent().getStringExtra(C.EXTRA_AMOUNT));
+        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
 
+        confirmationForTokenTransfer = contractAddress != null;
+
         toAddressText.setText(toAddress);
 
-        String amountString = "-" + amount + " " + symbol;
+        String amountString = "-" + BalanceUtils.subunitToBase(amount, decimals).toPlainString() + " " + symbol;
         valueText.setText(amountString);
         valueText.setTextColor(ContextCompat.getColor(this, R.color.red));
 
@@ -110,7 +117,7 @@ public class ConfirmationActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
-        viewModel.prepare();
+        viewModel.prepare(confirmationForTokenTransfer);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -134,13 +141,22 @@ public class ConfirmationActivity extends BaseActivity {
     private void onSend() {
         GasSettings gasSettings = viewModel.gasSettings().getValue();
 
-        viewModel.createTransaction(
-                fromAddressText.getText().toString(),
-                toAddressText.getText().toString(),
-                amount,
-                gasSettings.gasPrice,
-                gasSettings.gasLimit
-        );
+        if (!confirmationForTokenTransfer) {
+            viewModel.createTransaction(
+                    fromAddressText.getText().toString(),
+                    toAddressText.getText().toString(),
+                    amount,
+                    gasSettings.gasPrice,
+                    gasSettings.gasLimit);
+        } else {
+            viewModel.createTokenTransfer(
+                    fromAddressText.getText().toString(),
+                    toAddressText.getText().toString(),
+                    contractAddress,
+                    amount,
+                    gasSettings.gasPrice,
+                    gasSettings.gasLimit);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -153,12 +169,13 @@ public class ConfirmationActivity extends BaseActivity {
                 .setTitle(R.string.transaction_succeeded)
                 .setMessage(hash)
                 .setPositiveButton(R.string.button_ok, (dialog1, id) -> {
-                    // Do nothing
+                    finish();
                 })
                 .setNeutralButton(R.string.copy, (dialog1, id) -> {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("transaction hash", hash);
                     clipboard.setPrimaryClip(clip);
+                    finish();
                 })
                 .create();
         dialog.show();

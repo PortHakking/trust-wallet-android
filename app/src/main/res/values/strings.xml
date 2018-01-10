@@ -79,7 +79,7 @@
     <string name="account_already_imported">Wallet with this address already exists</string>
     <string name="message_delete_account">Permanently deleting wallet. Make sure that it has been exported and stored elsewhere.</string>
     <string name="error_import">Error importing keystore</string>
-    <string name="message_this_is_your_address">My Ethereum wallet address</string>
+    <string name="message_this_is_your_address">My public Ethereum wallet address</string>
     <string name="min_pwd_length">Password must be at least %d chars long</string>
     <string name="backup_warning_text">
         Since only you control your money, you\'ll need to save your backup keystore in case this app is deleted. \n\n
@@ -139,12 +139,14 @@
     <string name="title_my_tokens">My Tokens</string>
     <string name="title_activity_send">Send</string>
     <string name="title_activity_confirmation">Confirm</string>
+    <string name="title_transaction_details">Transaction Details</string>
+    <string name="title_add_token">Add Custom Token</string>
     <!-- Suggestions -->
     <string name="suggestion_field_required">* Field required</string>
     <string name="suggestion_import_keystore">Importing wallet as easy as creating</string>
     <string name="suggestion_private_key">Private key has to be 64 characters long</string>
     <string name="suggestion_empty_password_available">The password can be left blank.</string>
-    <string name="suggestion_this_is_your_address">My %s wallet address</string>
+    <string name="suggestion_this_is_your_address">My public %s wallet address</string>
     <!-- Hints -->
     <string name="hint_private_key_field">Private key *</string>
     <string name="hint_keystore">Keystore *</string>
@@ -181,16 +183,19 @@
     <string name="button_ok">OK</string>
     <string name="hint_recipient_address">Recipient address</string>
     <string name="hint_amount">Amount</string>
+    <string name="hint_contract_address">Contract address</string>
+    <string name="hint_contract_symbol">Symbol</string>
+    <string name="hint_contract_decimals">Decimals</string>
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
-    <string name="subtitle_gas_fee">Gas Fee (Gwei)</string>
+    <string name="subtitle_gas_fee">Gas Fee</string>
     <string name="subtitle_transaction_num">Transaction #</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
     <string name="subtitle_block_num">Block #</string>
     <!-- Actions -->
     <string name="action_share">Share</string>
-    <string name="action_transaction_detail">More details</string>
+    <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_shapeshift">Shapeshift (Crypto only)</string>
@@ -198,6 +203,7 @@
     <string name="action_wallets">Wallets</string>
     <string name="action_next">Next</string>
     <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_load_transaction">Failed to load transaction list</string>
@@ -205,6 +211,7 @@
     <string name="error_invalid_address">Invalid address</string>
     <string name="error_invalid_amount">Invalid amount</string>
     <string name="error_transaction_failed">Transaction error</string>
+    <string name="error_must_numeric">must be a numeric value.</string>
     <string name="transaction_succeeded">Transaction successful</string>
     <string name="NA">N/A</string>
     <string name="minus">-</string>
@@ -212,16 +219,20 @@
     <string name="no_transactions_yet">No transactions yet!</string>
     <string name="unknown_balance_with_symbol">-- ETH</string>
     <string name="unknown_balance_without_symbol">--</string>
-    <string name="dummy">dummy_value</string>
+    <string name="dummy">-</string>
     <string name="dummy_transaction_value">-- ETH</string>
     <string name="title_dialog_sending">Sending...</string>
     <string name="welcome.erc20.label.title">ERC20 Compatible</string>
     <string name="welcome.erc20.label.description">Support for ERC20 tokens by default.</string>
     <string name="i_understand">I understand</string>
     <string name="scan_qr">Get address from QR Code</string>
-    <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your tranasction will be processed by the %@ network.</string>
-    <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your %@. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
+    <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your transaction will be processed by the Ethereum network.</string>
+    <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
     <string name="title_send_settings">Advanced</string>
     <string name="title_activity_barcode">Barcode Scan</string>
-    <string name="action_save">Save</string>
+    <string name="error_add_token">Could not add token.</string>
+    <string name="facebook">Facebook</string>
+    <string name="error_already_added">Already added</string>
+    <string name="error_export_error">Failed to export the purse</string>
+    <string name="error_fail_load_tokens">Failed to load tokens list</string>
 </resources>
