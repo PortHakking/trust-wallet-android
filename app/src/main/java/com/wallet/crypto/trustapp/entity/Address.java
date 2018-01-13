@@ -17,6 +17,16 @@ public class Address {
     }
 
     public static boolean isAddress(String address) {
+        boolean lower = lowerCaseAddrPattern.matcher(address).find();
+        boolean upper = upperCaseAddrPattern.matcher(address).find();
+
+        if (!(upper || lower))
+        {
+            //isn't upper or lower - alter case
+            String newAddr = address.toLowerCase();
+            address = newAddr;
+        }
+
         return !(TextUtils.isEmpty(address) || !ignoreCaseAddrPattern.matcher(address).find())
                 && (lowerCaseAddrPattern.matcher(address).find() || upperCaseAddrPattern.matcher(address).find());
     }

@@ -68,7 +68,7 @@ public class EditTokenActivity extends BaseActivity implements View.OnClickListe
         symbolValue = getIntent().getStringExtra(C.EXTRA_SYMBOL);
 
         address.setText(contractAddress);
-        decimals.setText(decimalValue);
+        decimals.setText(String.valueOf(decimalValue));
         symbol.setText(symbolValue);
 
         findViewById(R.id.save).setOnClickListener(this);

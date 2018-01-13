@@ -13,7 +13,7 @@ import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
 
 import java.math.BigDecimal;
 
-public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
+public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
     private final TextView symbol;
     private final TextView balance;
@@ -27,6 +27,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         symbol = findViewById(R.id.symbol);
         balance = findViewById(R.id.balance);
         itemView.setOnClickListener(this);
+        itemView.setOnLongClickListener(this);
     }
 
     @Override
@@ -65,5 +66,14 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
+    }
+
+    @Override
+    public boolean onLongClick(View v)
+    {
+        if (onTokenClickListener != null) {
+            onTokenClickListener.onTokenLongClick(v, token);
+        }
+        return false;
     }
 }

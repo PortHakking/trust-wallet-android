@@ -14,6 +14,7 @@ import android.view.View;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.ui.widget.OnTokenClickListener;
 import com.wallet.crypto.trustapp.ui.widget.adapter.TokensAdapter;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModel;
 import com.wallet.crypto.trustapp.viewmodel.TokensViewModelFactory;
@@ -44,7 +45,23 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
 
         toolbar();
 
-        adapter = new TokensAdapter(this::onTokenClick);
+        final TokensActivity thisActivity = this;
+        OnTokenClickListener thisTokenListener = new OnTokenClickListener()
+        {
+            @Override
+            public void onTokenClick(View view, Token token)
+            {
+                thisActivity.onTokenClick(view, token);
+            }
+
+            @Override
+            public void onTokenLongClick(View view, Token token)
+            {
+                thisActivity.onTokenLongClick(view, token);
+            }
+        };
+
+        adapter = new TokensAdapter(thisTokenListener);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
 
@@ -93,6 +110,11 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
     private void onTokenClick(View view, Token token) {
         Context context = view.getContext();
         viewModel.showSendToken(context, token.tokenInfo.address, token.tokenInfo.symbol, token.tokenInfo.decimals);
+    }
+
+    private void onTokenLongClick(View view, Token token) {
+        Context context = view.getContext();
+        viewModel.showEditToken(context, token.tokenInfo.address, token.tokenInfo.symbol, token.tokenInfo.decimals);
     }
 
     @Override

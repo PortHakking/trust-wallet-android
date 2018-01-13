@@ -6,4 +6,5 @@ import com.wallet.crypto.trustapp.entity.Token;
 
 public interface OnTokenClickListener {
     void onTokenClick(View view, Token token);
+    void onTokenLongClick(View view, Token token);
 }
