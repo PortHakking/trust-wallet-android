@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.di;
 
 import com.wallet.crypto.trustapp.ui.AddTokenActivity;
 import com.wallet.crypto.trustapp.ui.ConfirmationActivity;
+import com.wallet.crypto.trustapp.ui.EditTokenActivity;
 import com.wallet.crypto.trustapp.ui.GasSettingsActivity;
 import com.wallet.crypto.trustapp.ui.ImportWalletActivity;
 import com.wallet.crypto.trustapp.ui.MyAddressActivity;
@@ -63,4 +64,8 @@ public abstract class BuildersModule {
 	@ActivityScope
     @ContributesAndroidInjector(modules = AddTokenModule.class)
 	abstract AddTokenActivity bindAddTokenActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = EditTokenModule.class)
+	abstract EditTokenActivity bindEditTokenActivity();
 }

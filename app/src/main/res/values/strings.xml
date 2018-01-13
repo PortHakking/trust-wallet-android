@@ -8,6 +8,7 @@
     <string name="title_account">Wallets</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_create_account">New Wallet</string>
+    <string name="title_edit_token">Edit Custom Token</string>
 
     <!-- Strings relatedwalletount creation -->
     <string name="prompt_email">Wallet name</string>

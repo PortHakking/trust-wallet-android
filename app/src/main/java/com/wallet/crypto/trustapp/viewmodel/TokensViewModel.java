@@ -11,6 +11,7 @@ import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
+import com.wallet.crypto.trustapp.router.EditTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
 import com.wallet.crypto.trustapp.router.TransactionsRouter;
 
@@ -26,18 +27,21 @@ public class TokensViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final TransactionsRouter transactionsRouter;
+    private final EditTokenRouter editTokenRouter;
 
     TokensViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             FetchTokensInteract fetchTokensInteract,
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
-            TransactionsRouter transactionsRouter) {
+            TransactionsRouter transactionsRouter,
+            EditTokenRouter editTokenRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.transactionsRouter = transactionsRouter;
+        this.editTokenRouter = editTokenRouter;
     }
 
     public void prepare() {
@@ -96,6 +100,11 @@ public class TokensViewModel extends BaseViewModel {
 
     public void showSendToken(Context context, String address, String symbol, int decimals) {
         sendTokenRouter.open(context, address, symbol, decimals);
+
+    }
+
+    public void showEditToken(Context context, String address, String symbol, int decimals) {
+        editTokenRouter.open(context, address, symbol, decimals);
 
     }
 
