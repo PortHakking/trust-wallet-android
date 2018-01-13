@@ -22,9 +22,9 @@ android {
     defaultConfig {
         applicationId "com.wallet.crypto.trustapp"
         minSdkVersion 18
-        targetSdkVersion 26
-        versionCode 43
-        versionName "1.4.8"
+        targetSdkVersion 27
+        versionCode 49
+        versionName "1.4.15"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
@@ -116,12 +116,17 @@ dependencies {
     })
     // Fabric
     compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
-        transitive = true;
+        transitive = true
     }
     compile('com.crashlytics.sdk.android:answers:1.4.1@aar') {
-        transitive = true;
+        transitive = true
     }
     // PW
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(":tn")
+
+    // Pincode Lollipin
+//    compile('com.github.omadahealth:lollipin:2.1.0@aar') {
+//        transitive = true
+//    }
 }

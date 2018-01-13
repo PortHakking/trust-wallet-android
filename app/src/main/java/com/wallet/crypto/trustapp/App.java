@@ -26,6 +26,11 @@ public class App extends MultiDexApplication implements HasActivityInjector {
 				.application(this)
 				.build()
 				.inject(this);
+
+		// enable pin code for the application
+//		LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+//		lockManager.enableAppLock(this, CustomPinActivity.class);
+//		lockManager.getAppLock().setShouldShowForgot(false);
 	}
 
 	@Override
