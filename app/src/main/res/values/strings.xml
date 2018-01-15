@@ -212,6 +212,7 @@
     <string name="error_fail_generate_qr">Could not generate qr code.</string>
     <string name="error_invalid_address">Invalid address</string>
     <string name="error_invalid_amount">Invalid amount</string>
+    <string name="error_unavailable_amount">Amount exceeds available balance</string>
     <string name="error_transaction_failed">Transaction error</string>
     <string name="error_must_numeric">must be a numeric value.</string>
     <string name="transaction_succeeded">Transaction successful</string>
@@ -238,4 +239,5 @@
     <string name="error_export">Failed to export the wallet</string>
     <string name="error_fail_load_tokens">Failed to load tokens list</string>
     <string name="error_create_wallet">Failed to create a wallet</string>
+    <string name="decimal_point">.</string>
 </resources>

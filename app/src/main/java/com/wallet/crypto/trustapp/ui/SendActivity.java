@@ -13,12 +13,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.entity.NetworkInfo;
+import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.util.PriceUtils;
@@ -28,7 +31,9 @@ import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
 
 import org.ethereum.geth.Address;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -56,6 +61,11 @@ public class SendActivity extends BaseActivity {
     private TextInputLayout toInputLayout;
     private TextInputLayout amountInputLayout;
     private TextInputLayout usdAmountInputLayout;
+    private TextView ethBalanceText;
+    private TextView usdBalanceText;
+
+    private String ethBalance;
+    private String usdBalance;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,6 +78,7 @@ public class SendActivity extends BaseActivity {
 
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
+        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
 
         toInputLayout = findViewById(R.id.to_input_layout);
         toAddressText = findViewById(R.id.send_to_address);
@@ -75,6 +86,8 @@ public class SendActivity extends BaseActivity {
         amountText = findViewById(R.id.send_amount);
         usdAmountInputLayout = findViewById(R.id.usd_amount_input_layout);
         usdAmountText = findViewById(R.id.usd_send_amount);
+        ethBalanceText = findViewById(R.id.eth_balance_text);
+        usdBalanceText = findViewById(R.id.usd_balance_text);
 
         initializeFieldListeners();
 
@@ -120,45 +133,41 @@ public class SendActivity extends BaseActivity {
 
         amountTextWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                try {
-                    if (charSequence.length() > 0) {
-                        usdAmountText.setText(BalanceUtils.ethToUsd(PriceUtils.get().toString(), charSequence.toString()));
-                    } else {
-                        usdAmountText.getText().clear();
-                    }
-                } catch (NumberFormatException e) {
-                    Log.e("SEND", e.getMessage(), e);
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
+                    usdAmountText.setText(BalanceUtils.ethToUsd(PriceUtils.get().toString(), charSequence.toString()));
                 }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                if (editable.length() > 0 && !editable.toString().equals(getString(R.string.decimal_point))) {
+                    if (!isAvailableAmount(editable.toString())) {
+                        amountInputLayout.setError(getString(R.string.error_unavailable_amount));
+                    } else {
+                        amountInputLayout.setErrorEnabled(false);
+                    }
+                } else {
+                    amountInputLayout.setErrorEnabled(false);
+                }
             }
         };
 
         usdAmountTextWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                try {
-                    if (charSequence.length() > 0) {
-                        amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), PriceUtils.get().toString()));
-                    } else {
-                        amountText.getText().clear();
-                    }
-                } catch (NumberFormatException e) {
-                    Log.e("SEND", e.getMessage(), e);
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
+                    amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), PriceUtils.get().toString()));
                 }
             }
 
@@ -212,6 +221,27 @@ public class SendActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ethBalanceText.setText(getString(R.string.unknown_balance_with_symbol));
+        viewModel.prepare();
+    }
+
+    private void onBalanceChanged(Map<String, String> balance) {
+        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (networkInfo == null || wallet == null) {
+            return;
+        }
+
+        ethBalance = balance.get(networkInfo.symbol);
+        ethBalanceText.setText(ethBalance + " " + networkInfo.symbol);
+
+        usdBalance = balance.get(C.USD_SYMBOL);
+        usdBalanceText.setText(C.USD_SYMBOL + usdBalance);
+    }
+
     private void onNext() {
         // Validate input fields
         boolean inputValid = true;
@@ -224,6 +254,11 @@ public class SendActivity extends BaseActivity {
         if (!isValidAmount(amount)) {
             amountInputLayout.setError(getString(R.string.error_invalid_amount));
             inputValid = false;
+        } else if (!isAvailableAmount(amount)) {
+            amountInputLayout.setError(getString(R.string.error_unavailable_amount));
+            inputValid = false;
+        } else {
+            amountInputLayout.setErrorEnabled(false);
         }
 
         if (!inputValid) {
@@ -235,6 +270,21 @@ public class SendActivity extends BaseActivity {
 
         BigInteger amountInSubunits = BalanceUtils.baseToSubunit(amount, decimals);
         viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens);
+    }
+
+    boolean isAvailableAmount(String amount) {
+        if (amount.length() > 0) {
+            BigDecimal amountVal = new BigDecimal(amount.toString());
+            Log.d("Justin", "amount : " + amountVal);
+            Log.d("Justin", "result : " + amountVal.compareTo(new BigDecimal(ethBalance)));
+
+            if (amountVal != null && amountVal.compareTo(new BigDecimal(ethBalance)) == 1) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isAddressValid(String address) {
