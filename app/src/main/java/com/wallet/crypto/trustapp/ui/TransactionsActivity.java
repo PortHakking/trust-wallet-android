@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -36,14 +35,10 @@ import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModelFactory;
 import com.wallet.crypto.trustapp.widget.DepositView;
 import com.wallet.crypto.trustapp.widget.EmptyTransactionsView;
 import com.wallet.crypto.trustapp.widget.SystemView;
-
 import java.math.BigDecimal;
 import java.util.Map;
-
 import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
-
 import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 

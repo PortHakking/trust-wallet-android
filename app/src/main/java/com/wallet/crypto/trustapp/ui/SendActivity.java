@@ -115,16 +115,16 @@ public class SendActivity extends BaseActivity {
     }
 
     private void initializeFieldListeners() {
-        amountText.setOnFocusChangeListener((view, b) -> {
-            if (b) {
+        amountText.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
                 amountText.addTextChangedListener(amountTextWatcher);
             } else {
                 amountText.removeTextChangedListener(amountTextWatcher);
             }
         });
 
-        usdAmountText.setOnFocusChangeListener((view, b) -> {
-            if (b) {
+        usdAmountText.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
                 usdAmountText.addTextChangedListener(usdAmountTextWatcher);
             } else {
                 usdAmountText.removeTextChangedListener(usdAmountTextWatcher);

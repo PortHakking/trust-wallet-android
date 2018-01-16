@@ -30,7 +30,7 @@ public class BalanceUtils {
         BigDecimal usdVal = new BigDecimal(usdValue);
         if (usdVal.compareTo(BigDecimal.ZERO) == 0) return "";
         BigDecimal eth = new BigDecimal(usdValue).divide(new BigDecimal(ethPrice), 4, RoundingMode.HALF_EVEN);
-        return eth.toString();
+        return eth.toPlainString();
     }
 
     public static String EthToWei(String eth) throws Exception {
