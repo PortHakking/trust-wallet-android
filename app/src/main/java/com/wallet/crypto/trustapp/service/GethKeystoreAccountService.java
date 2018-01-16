@@ -5,7 +5,6 @@ import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.entity.ServiceErrorException;
 import com.wallet.crypto.trustapp.entity.ServiceException;
 import com.wallet.crypto.trustapp.entity.Wallet;
-
 import org.ethereum.geth.Account;
 import org.ethereum.geth.Accounts;
 import org.ethereum.geth.Address;
@@ -17,11 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletFile;
-
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
