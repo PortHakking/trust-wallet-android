@@ -9,6 +9,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmModel;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -17,6 +18,11 @@ public class RealmTokenSource implements TokenLocalSource {
     @Override
     public Completable put(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
         return Completable.fromAction(() -> putInNeed(networkInfo, wallet, tokenInfo));
+    }
+
+    @Override
+    public Completable update(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
+        return Completable.fromAction(() -> updateInNeed(networkInfo, wallet, tokenInfo));
     }
 
     @Override
@@ -84,7 +90,35 @@ public class RealmTokenSource implements TokenLocalSource {
                     obj.setAddedTime(System.currentTimeMillis());
                 });
             }
-        } finally {
+        }
+        finally {
+            if (realm != null) {
+                realm.close();
+            }
+        }
+    }
+
+    private void updateInNeed(NetworkInfo networkInfo, Wallet wallet, TokenInfo tokenInfo) {
+        Realm realm = null;
+        try {
+            realm = getRealmInstance(networkInfo, wallet);
+            RealmTokenInfo realmTokenInfo = realm.where(RealmTokenInfo.class)
+                    .equalTo("address", tokenInfo.address)
+                    .findFirst();
+            if (realmTokenInfo != null) {
+                realm.executeTransaction(r ->
+                {
+                    long addedTime = realmTokenInfo.getAddedTime();
+                    realmTokenInfo.deleteFromRealm();
+                    RealmTokenInfo obj = r.createObject(RealmTokenInfo.class, tokenInfo.address);
+                    obj.setName(tokenInfo.name);
+                    obj.setSymbol(tokenInfo.symbol);
+                    obj.setDecimals(tokenInfo.decimals);
+                    obj.setAddedTime(addedTime);
+                });
+            }
+        }
+        finally {
             if (realm != null) {
                 realm.close();
             }

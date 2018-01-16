@@ -99,6 +99,15 @@ public class TokenRepository implements TokenRepositoryType {
                 new TokenInfo(address, "", symbol, decimals));
     }
 
+    @Override
+    public Completable updateToken(Wallet wallet, String address, String symbol, int decimals)
+    {
+        return tokenLocalSource.update(
+                ethereumNetworkRepository.getDefaultNetwork(),
+                wallet,
+                new TokenInfo(address, "", symbol, decimals));
+    }
+
     private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo defaultNetwork, @NonNull Wallet wallet) {
         return Single.fromObservable(tokenNetworkService.fetch(wallet.address))
                 .flatMap(tokenInfos -> tokenLocalSource.put(defaultNetwork, wallet, tokenInfos))

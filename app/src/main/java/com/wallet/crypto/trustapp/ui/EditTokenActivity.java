@@ -68,6 +68,7 @@ public class EditTokenActivity extends BaseActivity implements View.OnClickListe
         symbolValue = getIntent().getStringExtra(C.EXTRA_SYMBOL);
 
         address.setText(contractAddress);
+        address.setEnabled(false);
         decimals.setText(String.valueOf(decimalValue));
         symbol.setText(symbolValue);
 
@@ -77,12 +78,12 @@ public class EditTokenActivity extends BaseActivity implements View.OnClickListe
                 .get(EditTokenViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
-        //viewModel.result().observe(this, this::onSaved);
+        viewModel.result().observe(this, this::onSaved);
     }
 
     private void onSaved(boolean result) {
         if (result) {
-            //viewModel.showTokens(this);
+            viewModel.showTokens(this);
             finish();
         }
     }

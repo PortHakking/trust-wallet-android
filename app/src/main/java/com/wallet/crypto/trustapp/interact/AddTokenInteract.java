@@ -23,4 +23,12 @@ public class AddTokenInteract {
                         .addToken(wallet, address, symbol, decimals)
                         .observeOn(AndroidSchedulers.mainThread()));
     }
+
+    public Completable update(String address, String symbol, int decimals) {
+        return walletRepository
+                .getDefaultWallet()
+                .flatMapCompletable(wallet -> tokenRepository
+                        .updateToken(wallet, address, symbol, decimals)
+                        .observeOn(AndroidSchedulers.mainThread()));
+    }
 }

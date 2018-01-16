@@ -11,4 +11,5 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetch(String walletAddress);
 
     Completable addToken(Wallet wallet, String address, String symbol, int decimals);
+    Completable updateToken(Wallet wallet, String address, String symbol, int decimals);
 }

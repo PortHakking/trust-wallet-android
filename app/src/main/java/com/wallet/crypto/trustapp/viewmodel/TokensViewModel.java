@@ -85,12 +85,14 @@ public class TokensViewModel extends BaseViewModel {
     private void onFetchTokensCompletable() {
         progress.postValue(false);
         Token[] tokens = tokens().getValue();
-        if (tokens == null || tokens.length == 0) {
+        if (tokens == null || tokens.length == 0)
+        {
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
         }
     }
 
-    private void onTokens(Token[] tokens) {
+    private void onTokens(Token[] tokens)
+    {
         this.tokens.setValue(tokens);
     }
 
@@ -100,12 +102,10 @@ public class TokensViewModel extends BaseViewModel {
 
     public void showSendToken(Context context, String address, String symbol, int decimals) {
         sendTokenRouter.open(context, address, symbol, decimals);
-
     }
 
     public void showEditToken(Context context, String address, String symbol, int decimals) {
         editTokenRouter.open(context, address, symbol, decimals);
-
     }
 
     public void showTransactions(Context context, boolean isClearStack) {

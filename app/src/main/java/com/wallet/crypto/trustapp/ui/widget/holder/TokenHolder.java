@@ -39,15 +39,41 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         try {
             symbol.setText(token.tokenInfo.symbol);
-
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
-            BigDecimal ethBalance = token.tokenInfo.decimals > 0
-                    ? token.balance.divide(decimalDivisor) : token.balance;
-            String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
-                    ? "0"
-                    : ethBalance.toPlainString();
-            this.balance.setText(value);
+            setBalance(token.tokenInfo.decimals);
         } catch (Exception e) {
+            //try to work out what the minimum value is
+            if (!token.balance.equals(BigDecimal.ZERO)) {
+                calculateMinimumScalingFactor();
+            }
+            else {
+                fillEmpty();
+            }
+        }
+    }
+
+    private void setBalance(int decimals) throws Exception
+    {
+        BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, decimals));
+        BigDecimal ethBalance = decimals > 0
+                ? token.balance.divide(decimalDivisor) : token.balance;
+        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0
+                ? "0"
+                : ethBalance.toPlainString();
+        this.balance.setText(value);
+    }
+
+    private void calculateMinimumScalingFactor() {
+        try
+        {
+            double balanceDb = token.balance.doubleValue();
+            int scaleFactor = (int) Math.log10(balanceDb) - 1;
+            //recommended scaling factor is about 1 less than this value
+            //TODO: easy: auto-correct user error, don't display a null when there are tokens: DONE
+            //TODO: hard - pull decimals from contract
+            setBalance(scaleFactor);
+        }
+        catch (Exception e) {
+            //still can't display - default to displaying the '-'
             fillEmpty();
         }
     }

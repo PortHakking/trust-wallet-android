@@ -1,9 +1,11 @@
 package com.wallet.crypto.trustapp.di;
 
+import com.wallet.crypto.trustapp.interact.AddTokenInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 import com.wallet.crypto.trustapp.repository.WalletRepositoryType;
 import com.wallet.crypto.trustapp.router.MyTokensRouter;
+import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModelFactory;
 import com.wallet.crypto.trustapp.viewmodel.EditTokenViewModelFactory;
 
 import dagger.Module;
@@ -15,21 +17,22 @@ import dagger.Provides;
 
 
 @Module
-public class EditTokenModule
-{
-
+public class EditTokenModule {
     @Provides
     EditTokenViewModelFactory editTokenViewModelFactory(
-            ) {
+        AddTokenInteract addTokenInteract,
+        FindDefaultWalletInteract findDefaultWalletInteract,
+        MyTokensRouter myTokensRouter)
+    {
         return new EditTokenViewModelFactory(
-                );
+                addTokenInteract, findDefaultWalletInteract, myTokensRouter);
     }
 
-    /*@Provides
-    EditTokenInteract provideEditTokenInteract(
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
             TokenRepositoryType tokenRepository,
             WalletRepositoryType walletRepository) {
-        return new EditTokenInteract(walletRepository, tokenRepository);
+        return new AddTokenInteract(walletRepository, tokenRepository);
     }
 
     @Provides
@@ -40,6 +43,6 @@ public class EditTokenModule
     @Provides
     MyTokensRouter provideMyTokensRouter() {
         return new MyTokensRouter();
-    }*/
+    }
 }
 
