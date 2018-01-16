@@ -274,15 +274,8 @@ public class SendActivity extends BaseActivity {
 
     boolean isAvailableAmount(String amount) {
         if (amount.length() > 0) {
-            BigDecimal amountVal = new BigDecimal(amount.toString());
-            Log.d("Justin", "amount : " + amountVal);
-            Log.d("Justin", "result : " + amountVal.compareTo(new BigDecimal(ethBalance)));
-
-            if (amountVal != null && amountVal.compareTo(new BigDecimal(ethBalance)) == 1) {
-                return false;
-            } else {
-                return true;
-            }
+            BigDecimal amountVal = new BigDecimal(amount);
+            return amountVal.compareTo(new BigDecimal(ethBalance)) != 1;
         }
         return false;
     }
