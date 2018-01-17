@@ -99,8 +99,7 @@
     <string name="title_terms">Terms and Conditions</string>
     <string name="title_version">Version</string>
     <string name="title_activity_token_list">Tokens</string>
-    <string name="title_tokens">My Assets</string>
-    <string name="title_marketplace">Marketplace</string>
+    <string name="title_tokens">My Tokens</string>
     <string name="prompt_private_key">Private key</string>
     <string name="error_import_private_key">Error importing private key</string>
     <string name="message_importing_private_key">Importing private key. One moment.</string>
