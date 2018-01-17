@@ -184,6 +184,7 @@
     <string name="button_ok">OK</string>
     <string name="hint_recipient_address">Recipient address</string>
     <string name="hint_amount">Amount</string>
+    <string name="hint_amount_with_symbol">Amount (%1$s)</string>
     <string name="hint_contract_address">Contract address</string>
     <string name="hint_contract_symbol">Symbol</string>
     <string name="hint_contract_decimals">Decimals</string>

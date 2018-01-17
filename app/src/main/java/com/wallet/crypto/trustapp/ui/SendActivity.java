@@ -50,8 +50,6 @@ public class SendActivity extends BaseActivity {
     private EditText toAddressText;
     private EditText amountText;
     private EditText usdAmountText;
-    private TextWatcher amountTextWatcher;
-    private TextWatcher usdAmountTextWatcher;
 
     // In case we're sending tokens
     private boolean sendingTokens = false;
@@ -98,8 +96,8 @@ public class SendActivity extends BaseActivity {
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
 
         setTitle(getString(R.string.title_send) + " " + symbol);
-        amountInputLayout.setHint(getString(R.string.hint_amount) + " (" + symbol + ")");
-        usdAmountInputLayout.setHint(getString(R.string.hint_amount) + " (" + C.USD_SYMBOL + ")");
+        amountInputLayout.setHint(getString(R.string.hint_amount_with_symbol, symbol));
+        usdAmountInputLayout.setHint(getString(R.string.hint_amount_with_symbol, C.USD_SYMBOL));
 
         // Populate to address if it has been passed forward
         String toAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
@@ -130,52 +128,6 @@ public class SendActivity extends BaseActivity {
                 usdAmountText.removeTextChangedListener(usdAmountTextWatcher);
             }
         });
-
-        amountTextWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
-                    usdAmountText.setText(BalanceUtils.ethToUsd(PriceUtils.get().toString(), charSequence.toString()));
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0 && !editable.toString().equals(getString(R.string.decimal_point))) {
-                    if (!isAvailableAmount(editable.toString())) {
-                        amountInputLayout.setError(getString(R.string.error_unavailable_amount));
-                    } else {
-                        amountInputLayout.setErrorEnabled(false);
-                    }
-                } else {
-                    amountInputLayout.setErrorEnabled(false);
-                }
-            }
-        };
-
-        usdAmountTextWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
-                    amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), PriceUtils.get().toString()));
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        };
     }
 
     @Override
@@ -297,4 +249,44 @@ public class SendActivity extends BaseActivity {
             return false;
         }
     }
+
+    private final TextWatcher amountTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
+                usdAmountText.setText(BalanceUtils.ethToUsd(PriceUtils.get().toString(), charSequence.toString()));
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (editable.length() > 0 && !editable.toString().equals(getString(R.string.decimal_point))) {
+                if (!isAvailableAmount(editable.toString())) {
+                    amountInputLayout.setError(getString(R.string.error_unavailable_amount));
+                } else {
+                    amountInputLayout.setErrorEnabled(false);
+                }
+            } else {
+                amountInputLayout.setErrorEnabled(false);
+            }
+        }
+    };
+
+    private final TextWatcher usdAmountTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
+                amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), PriceUtils.get().toString()));
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {}
+    };
 }
