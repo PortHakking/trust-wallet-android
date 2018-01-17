@@ -2,6 +2,7 @@ package com.wallet.crypto.trustapp.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -80,7 +81,18 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
 
-        refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
+        String setupToken = "SETUPTOKEN";
+
+        if (getIntent().hasExtra(setupToken))
+        {
+            Uri i = getIntent().getParcelableExtra(setupToken);
+            if (i != null && i.toString().equals("setup"))
+            {
+                viewModel.setupTokens();
+            }
+        }
+
+        refreshLayout.setOnRefreshListener(viewModel::setupTokens);
     }
 
     @Override

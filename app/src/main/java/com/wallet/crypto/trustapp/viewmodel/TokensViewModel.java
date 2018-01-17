@@ -10,6 +10,7 @@ import com.wallet.crypto.trustapp.entity.Token;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.trustapp.interact.SetupTokensInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.EditTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
@@ -24,6 +25,7 @@ public class TokensViewModel extends BaseViewModel {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final SetupTokensInteract setupTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final TransactionsRouter transactionsRouter;
@@ -35,13 +37,15 @@ public class TokensViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
             TransactionsRouter transactionsRouter,
-            EditTokenRouter editTokenRouter) {
+            EditTokenRouter editTokenRouter,
+            SetupTokensInteract setupTokensInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.transactionsRouter = transactionsRouter;
         this.editTokenRouter = editTokenRouter;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     public void prepare() {
@@ -69,7 +73,7 @@ public class TokensViewModel extends BaseViewModel {
     }
 
     public LiveData<Token[]> tokens() {
-        return tokens;
+          return tokens;
     }
 
     public void fetchTokens() {
@@ -82,8 +86,18 @@ public class TokensViewModel extends BaseViewModel {
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 
+    public void setupTokens() {
+        progress.postValue(true);
+        if (defaultNetwork.getValue() == null) {
+            findDefaultNetwork();
+        }
+        disposable = setupTokensInteract
+                .update(wallet.getValue())
+                .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
+    }
+
     private void onFetchTokensCompletable() {
-        progress.postValue(false);
+         progress.postValue(false);
         Token[] tokens = tokens().getValue();
         if (tokens == null || tokens.length == 0)
         {
@@ -91,8 +105,11 @@ public class TokensViewModel extends BaseViewModel {
         }
     }
 
-    private void onTokens(Token[] tokens)
-    {
+    private void onTokens(Token[] tokens) {
+        this.tokens.setValue(tokens);
+    }
+
+    private void onTokensSetup(Token[] tokens) {
         this.tokens.setValue(tokens);
     }
 

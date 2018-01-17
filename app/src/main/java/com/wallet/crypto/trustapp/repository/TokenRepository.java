@@ -17,12 +17,15 @@ import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.Uint;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -70,6 +73,23 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
+    @Override
+    public Observable<Token[]> update(String walletAddress)
+    {
+        NetworkInfo defaultNetwork = ethereumNetworkRepository.getDefaultNetwork();
+        Wallet wallet = new Wallet(walletAddress);
+        return setupTokensFromLocal(defaultNetwork, wallet).toObservable();
+//        return Single.merge(
+//                setupTokensFromLocal(defaultNetwork, wallet)
+//                updateTokenInfoCache(defaultNetwork, wallet))
+//                .toObservable();
+    }
+
+    private Single<Token[]> setupTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
+        return tokenLocalSource.fetch(defaultNetwork, wallet)
+                .map(items -> getTokenDetails(wallet, items));
+    }
+
     private Single<Token[]> fetchTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
         return tokenLocalSource.fetch(defaultNetwork, wallet)
                 .map(items -> getBalances(wallet, items));
@@ -80,13 +100,38 @@ public class TokenRepository implements TokenRepositoryType {
         Token[] result = new Token[len];
         for (int i = 0; i < len; i++) {
             BigDecimal balance = null;
+            String name = null;
             try {
                 balance = getBalance(wallet, items[i]);
             } catch (Exception e1) {
                 Log.d("TOKEN", "Err", e1);
                                     /* Quietly */
             }
+            System.out.println("NAME: " + name);
             result[i] = new Token(items[i], balance);
+        }
+        return result;
+    }
+
+    private Token[] getTokenDetails(Wallet wallet, TokenInfo[] items) {
+        int len = items.length;
+        Token[] result = new Token[len];
+        for (int i = 0; i < len; i++) {
+            BigDecimal balance = null;
+            String name = null;
+            String symbol = null;
+            int decimals = 18;
+            try {
+                balance = getBalance(wallet, items[i]);
+                name = getName(wallet, items[i]);
+                symbol = getSymbol(wallet, items[i]);
+                decimals = getDecimals(wallet, items[i]);
+            } catch (Exception e1) {
+                Log.d("TOKEN", "Err", e1);
+                                    /* Quietly */
+            }
+            TokenInfo t = new TokenInfo(items[i].address, name, symbol, decimals);
+            result[i] = new Token(t, balance);
         }
         return result;
     }
@@ -100,8 +145,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable updateToken(Wallet wallet, String address, String symbol, int decimals)
-    {
+    public Completable updateToken(Wallet wallet, String address, String symbol, int decimals) {
         return tokenLocalSource.update(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
@@ -127,11 +171,69 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
+    private String getName(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        org.web3j.abi.datatypes.Function function = nameOf();
+        String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return (String)response.get(0).getValue();
+        } else {
+            return null;
+        }
+    }
+
+    private String getSymbol(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        org.web3j.abi.datatypes.Function function = symbolOf();
+        String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            return (String)response.get(0).getValue();
+        } else {
+            return null;
+        }
+    }
+
+    private int getDecimals(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+        org.web3j.abi.datatypes.Function function = decimalsOf();
+        String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+        if (response.size() == 1) {
+            //return (int)response.get(0).getValue();
+            return ((Uint8) response.get(0)).getValue().intValue();
+        } else {
+            return 18; //default
+        }
+    }
+
     private static org.web3j.abi.datatypes.Function balanceOf(String owner) {
         return new org.web3j.abi.datatypes.Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function nameOf() {
+        return new Function("name",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function symbolOf() {
+        return new Function("symbol",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function decimalsOf() {
+        return new Function("decimals",
+                Arrays.<Type>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
     private String callSmartContractFunction(

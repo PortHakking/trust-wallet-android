@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
+import com.wallet.crypto.trustapp.interact.SetupTokensInteract;
 import com.wallet.crypto.trustapp.router.AddTokenRouter;
 import com.wallet.crypto.trustapp.router.EditTokenRouter;
 import com.wallet.crypto.trustapp.router.SendTokenRouter;
@@ -15,6 +16,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final SetupTokensInteract setupTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final TransactionsRouter transactionsRouter;
@@ -25,13 +27,15 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
                                   TransactionsRouter transactionsRouter,
-                                  EditTokenRouter editTokenRouter) {
+                                  EditTokenRouter editTokenRouter,
+                                  SetupTokensInteract setupTokensInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.transactionsRouter = transactionsRouter;
         this.editTokenRouter = editTokenRouter;
+        this.setupTokensInteract = setupTokensInteract;
     }
 
     @NonNull
@@ -43,6 +47,7 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                 addTokenRouter,
                 sendTokenRouter,
                 transactionsRouter,
-                editTokenRouter);
+                editTokenRouter,
+                setupTokensInteract);
     }
 }

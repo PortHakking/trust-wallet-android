@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -62,6 +65,36 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
+
+        address.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+                //wait until we have an ethereum address
+                String check = address.getText().toString();
+                if (check.length() > 39 && check.length() < 43)
+                {
+                    if (Address.isAddress(check))
+                    {
+                        //let's check the address here - see if we have an eth token
+
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+
+            }
+        });
     }
 
     private void onSaved(boolean result) {
@@ -86,7 +119,14 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             case R.id.save: {
                 onSave();
             } break;
+            case R.id.check: {
+                onCheck();
+            } break;
         }
+    }
+
+    private void onCheck() {
+
     }
 
     private void onSave() {
@@ -101,7 +141,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
-        if (TextUtils.isEmpty(symbol)) {
+        /*if (TextUtils.isEmpty(symbol)) {
             symbolLayout.setError(getString(R.string.error_field_required));
             isValid = false;
         }
@@ -116,7 +156,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         } catch (NumberFormatException ex) {
             decimalsLayout.setError(getString(R.string.error_must_numeric));
             isValid = false;
-        }
+        }*/
 
         if (!Address.isAddress(address)) {
             addressLayout.setError(getString(R.string.error_invalid_address));

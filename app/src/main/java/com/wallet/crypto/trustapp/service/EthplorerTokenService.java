@@ -85,7 +85,7 @@ public class EthplorerTokenService implements TokenExplorerClientType {
 
         @Override
         public Observer<? super Response<EthplorerResponse>> apply(Observer<? super EthplorerResponse> observer) throws Exception {
-            return new DisposableObserver<Response<EthplorerResponse>>() {
+             return new DisposableObserver<Response<EthplorerResponse>>() {
                 @Override
                 public void onNext(Response<EthplorerResponse> response) {
                     EthplorerResponse body = response.body();
