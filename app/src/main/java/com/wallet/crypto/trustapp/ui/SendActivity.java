@@ -11,6 +11,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -38,6 +39,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+
+import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
 
 public class SendActivity extends BaseActivity {
 
@@ -77,6 +80,7 @@ public class SendActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
 
         toInputLayout = findViewById(R.id.to_input_layout);
         toAddressText = findViewById(R.id.send_to_address);
@@ -176,7 +180,7 @@ public class SendActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        ethBalanceText.setText(getString(R.string.unknown_balance_with_symbol));
+        ethBalanceText.setText(getString(R.string.unknown_balance_without_symbol));
         viewModel.prepare();
     }
 
@@ -192,6 +196,13 @@ public class SendActivity extends BaseActivity {
 
         usdBalance = balance.get(C.USD_SYMBOL);
         usdBalanceText.setText(C.USD_SYMBOL + usdBalance);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        if (networkInfo != null && networkInfo.name.equals(ETHEREUM_NETWORK_NAME)) {
+            usdAmountInputLayout.setVisibility(View.VISIBLE);
+            usdBalanceText.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onNext() {

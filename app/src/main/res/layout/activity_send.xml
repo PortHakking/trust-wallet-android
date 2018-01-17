@@ -31,8 +31,9 @@
                 android:id="@+id/usd_balance_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="0.00"
                 android:textSize="@dimen/normal_text"
-                android:text="0.00"/>
+                android:visibility="gone"/>
         </LinearLayout>
         <RelativeLayout
             android:id="@+id/send_to_address_layout"
@@ -89,9 +90,10 @@
         </android.support.design.widget.TextInputLayout>
         <android.support.design.widget.TextInputLayout
             android:id="@+id/usd_amount_input_layout"
-            android:layout_marginTop="@dimen/big_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/big_margin"
+            android:visibility="gone"
             >
             <EditText
                 android:id="@+id/usd_send_amount"
