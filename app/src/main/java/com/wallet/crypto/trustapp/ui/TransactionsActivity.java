@@ -177,12 +177,7 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
                 return true;
             }
             case R.id.action_send: {
-                if (!isBalanceEmpty) {
-                    viewModel.showSend(this);
-                } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.empty_balance), Toast.LENGTH_SHORT).show();
-                }
-
+                viewModel.showSend(this);
                 return true;
             }
         }
