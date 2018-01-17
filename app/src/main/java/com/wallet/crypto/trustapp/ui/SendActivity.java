@@ -25,7 +25,6 @@ import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
-import com.wallet.crypto.trustapp.util.PriceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModel;
 import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
@@ -64,9 +63,11 @@ public class SendActivity extends BaseActivity {
     private TextInputLayout usdAmountInputLayout;
     private TextView ethBalanceText;
     private TextView usdBalanceText;
+    private TextView priceText;
 
     private String ethBalance;
     private String usdBalance;
+    private String currentPrice;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,6 +82,7 @@ public class SendActivity extends BaseActivity {
                 .get(SendViewModel.class);
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.defaultPrice().observe(this, this::onDefaultPrice);
 
         toInputLayout = findViewById(R.id.to_input_layout);
         toAddressText = findViewById(R.id.send_to_address);
@@ -90,6 +92,7 @@ public class SendActivity extends BaseActivity {
         usdAmountText = findViewById(R.id.usd_send_amount);
         ethBalanceText = findViewById(R.id.eth_balance_text);
         usdBalanceText = findViewById(R.id.usd_balance_text);
+        priceText = findViewById(R.id.price_text);
 
         initializeFieldListeners();
 
@@ -205,6 +208,12 @@ public class SendActivity extends BaseActivity {
         }
     }
 
+    private void onDefaultPrice(String price) {
+        currentPrice = price;
+        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
+        priceText.setText(getString(R.string.current_price, networkInfo.symbol, currentPrice));
+    }
+
     private void onNext() {
         // Validate input fields
         boolean inputValid = true;
@@ -268,7 +277,9 @@ public class SendActivity extends BaseActivity {
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
             if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
-                usdAmountText.setText(BalanceUtils.ethToUsd(PriceUtils.get().toString(), charSequence.toString()));
+                usdAmountText.setText(BalanceUtils.ethToUsd(currentPrice, charSequence.toString()));
+            } else if (charSequence.length() == 0) {
+                usdAmountText.getText().clear();
             }
         }
 
@@ -293,7 +304,9 @@ public class SendActivity extends BaseActivity {
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
             if (charSequence.length() > 0 && !charSequence.toString().equals(getString(R.string.decimal_point))) {
-                amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), PriceUtils.get().toString()));
+                amountText.setText(BalanceUtils.usdToEth(charSequence.toString(), currentPrice));
+            } else if (charSequence.length() == 0) {
+                amountText.getText().clear();
             }
         }
 

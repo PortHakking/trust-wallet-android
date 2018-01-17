@@ -3,6 +3,7 @@ package com.wallet.crypto.trustapp.di;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.interact.GetCurrentPrice;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.repository.EthereumNetworkRepositoryType;
 import com.wallet.crypto.trustapp.repository.GasSettingsRepositoryType;
@@ -17,9 +18,9 @@ import dagger.Provides;
 class SendModule {
     @Provides
     SendViewModelFactory provideSendViewModelFactory(ConfirmationRouter confirmationRouter, FetchGasSettingsInteract fetchGasSettingsInteract, FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                                     FindDefaultWalletInteract findDefaultWalletInteract, GetDefaultWalletBalance getDefaultWalletBalance) {
+                                                     FindDefaultWalletInteract findDefaultWalletInteract, GetDefaultWalletBalance getDefaultWalletBalance, GetCurrentPrice getCurrentPrice) {
         return new SendViewModelFactory(confirmationRouter, fetchGasSettingsInteract, findDefaultNetworkInteract,
-                findDefaultWalletInteract, getDefaultWalletBalance, findDefaultNetworkInteract, findDefaultWalletInteract);
+                findDefaultWalletInteract, getDefaultWalletBalance, getCurrentPrice);
     }
 
     @Provides
@@ -49,4 +50,9 @@ class SendModule {
         return new FindDefaultWalletInteract(walletRepository);
     }
 
+    @Provides
+    GetCurrentPrice provideGetCurrentPrice(
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+        return new GetCurrentPrice(ethereumNetworkRepository);
+    }
 }

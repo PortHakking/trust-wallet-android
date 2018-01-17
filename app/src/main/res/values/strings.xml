@@ -19,6 +19,7 @@
     <string name="empty_balance">Unable to send, wallet is empty</string>
     <string name="prompt_to">To</string>
     <string name="action_send">Send</string>
+    <string name="current_price">1 %1$s = %2$s</string>
 
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>

@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import com.wallet.crypto.trustapp.interact.FetchGasSettingsInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultNetworkInteract;
 import com.wallet.crypto.trustapp.interact.FindDefaultWalletInteract;
+import com.wallet.crypto.trustapp.interact.GetCurrentPrice;
 import com.wallet.crypto.trustapp.interact.GetDefaultWalletBalance;
 import com.wallet.crypto.trustapp.router.ConfirmationRouter;
 
@@ -18,18 +19,20 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GetCurrentPrice getCurrentPrice;
 
-    public SendViewModelFactory(ConfirmationRouter confirmationRouter, FetchGasSettingsInteract fetchGasSettingsInteract, FindDefaultNetworkInteract findDefaultNetworkInteract, FindDefaultWalletInteract findDefaultWalletInteract, GetDefaultWalletBalance getDefaultWalletBalance, FindDefaultNetworkInteract findDefaultNetworkInteract1, FindDefaultWalletInteract findDefaultWalletInteract1) {
+    public SendViewModelFactory(ConfirmationRouter confirmationRouter, FetchGasSettingsInteract fetchGasSettingsInteract, FindDefaultNetworkInteract findDefaultNetworkInteract, FindDefaultWalletInteract findDefaultWalletInteract, GetDefaultWalletBalance getDefaultWalletBalance, GetCurrentPrice getCurrentPrice) {
         this.confirmationRouter = confirmationRouter;
         this.fetchGasSettingsInteract = fetchGasSettingsInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract1;
-        this.findDefaultWalletInteract = findDefaultWalletInteract1;
+        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.getCurrentPrice = getCurrentPrice;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SendViewModel(confirmationRouter, fetchGasSettingsInteract, findDefaultNetworkInteract, findDefaultWalletInteract, getDefaultWalletBalance);
+        return (T) new SendViewModel(confirmationRouter, fetchGasSettingsInteract, findDefaultNetworkInteract, findDefaultWalletInteract, getDefaultWalletBalance, getCurrentPrice);
     }
 }

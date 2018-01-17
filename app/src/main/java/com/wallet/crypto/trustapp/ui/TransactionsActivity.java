@@ -27,7 +27,6 @@ import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Transaction;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.ui.widget.adapter.TransactionsAdapter;
-import com.wallet.crypto.trustapp.util.PriceUtils;
 import com.wallet.crypto.trustapp.util.RootUtil;
 import com.wallet.crypto.trustapp.viewmodel.BaseNavigationActivity;
 import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModel;
