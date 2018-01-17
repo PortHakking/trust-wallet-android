@@ -115,16 +115,16 @@ public class SendActivity extends BaseActivity {
     }
 
     private void initializeFieldListeners() {
-        amountText.setOnFocusChangeListener((view, b) -> {
-            if (b) {
+        amountText.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
                 amountText.addTextChangedListener(amountTextWatcher);
             } else {
                 amountText.removeTextChangedListener(amountTextWatcher);
             }
         });
 
-        usdAmountText.setOnFocusChangeListener((view, b) -> {
-            if (b) {
+        usdAmountText.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
                 usdAmountText.addTextChangedListener(usdAmountTextWatcher);
             } else {
                 usdAmountText.removeTextChangedListener(usdAmountTextWatcher);
@@ -274,13 +274,8 @@ public class SendActivity extends BaseActivity {
 
     boolean isAvailableAmount(String amount) {
         if (amount.length() > 0 && ethBalance != null) {
-            BigDecimal amountVal = new BigDecimal(amount.toString());
-
-            if (amountVal != null && amountVal.compareTo(new BigDecimal(ethBalance)) == 1) {
-                return false;
-            } else {
-                return true;
-            }
+            BigDecimal amountVal = new BigDecimal(amount);
+            return amountVal.compareTo(new BigDecimal(ethBalance)) != 1;
         }
         return false;
     }
