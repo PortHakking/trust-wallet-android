@@ -73,7 +73,7 @@ public class TokensViewModel extends BaseViewModel {
     }
 
     public LiveData<Token[]> tokens() {
-          return tokens;
+         return tokens;
     }
 
     public void fetchTokens() {
@@ -86,18 +86,18 @@ public class TokensViewModel extends BaseViewModel {
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
 
-    public void setupTokens() {
-        progress.postValue(true);
-        if (defaultNetwork.getValue() == null) {
-            findDefaultNetwork();
-        }
-        disposable = setupTokensInteract
-                .update(wallet.getValue())
-                .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
-    }
+//    public void setupTokens() {
+//        progress.postValue(true);
+//        if (defaultNetwork.getValue() == null) {
+//            findDefaultNetwork();
+//        }
+//        disposable = setupTokensInteract
+//                .update(wallet.getValue())
+//                .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
+//    }
 
     private void onFetchTokensCompletable() {
-         progress.postValue(false);
+        progress.postValue(false);
         Token[] tokens = tokens().getValue();
         if (tokens == null || tokens.length == 0)
         {

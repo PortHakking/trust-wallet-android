@@ -16,6 +16,8 @@ import android.widget.TextView;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.Address;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
+import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModel;
 import com.wallet.crypto.trustapp.viewmodel.AddTokenViewModelFactory;
 import com.wallet.crypto.trustapp.widget.SystemView;
@@ -23,6 +25,8 @@ import com.wallet.crypto.trustapp.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+
+import static com.wallet.crypto.trustapp.C.Key.WALLET;
 
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
 
@@ -36,8 +40,10 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private TextView symbol;
     private TextInputLayout decimalsLayout;
     private TextView decimals;
+    private TextView name;
     private SystemView systemView;
     private Dialog dialog;
+    private boolean noUpdate;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +63,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         decimals = findViewById(R.id.decimals);
         systemView = findViewById(R.id.system_view);
         systemView.hide();
+        name = findViewById(R.id.textViewName);
+        name.setEnabled(false);
 
         findViewById(R.id.save).setOnClickListener(this);
 
@@ -65,33 +73,34 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
+        viewModel.update().observe(this, this::onChecked);
 
         address.addTextChangedListener(new TextWatcher()
         {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
-            {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
-            {
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //wait until we have an ethereum address
                 String check = address.getText().toString();
-                if (check.length() > 39 && check.length() < 43)
-                {
-                    if (Address.isAddress(check))
-                    {
+                if (check.length() > 39 && check.length() < 43) {
+                    if (!noUpdate && Address.isAddress(check)) {
                         //let's check the address here - see if we have an eth token
-
+                        onCheck();
+                        noUpdate = true;
+                    }
+                    else
+                    {
+                        noUpdate = false;
                     }
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable editable)
-            {
+            public void afterTextChanged(Editable editable) {
 
             }
         });
@@ -101,6 +110,17 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         if (result) {
             viewModel.showTokens(this);
             finish();
+        }
+    }
+
+    private void onChecked(boolean result) {
+        if (result) {
+            TokenInfo token = viewModel.tokenInfo().getValue();
+
+            address.setText(token.address);
+            symbol.setText(token.symbol);
+            decimals.setText(String.valueOf(token.decimals));
+            name.setText(token.name);
         }
     }
 
@@ -119,14 +139,13 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             case R.id.save: {
                 onSave();
             } break;
-            case R.id.check: {
-                onCheck();
-            } break;
         }
     }
 
     private void onCheck() {
-
+        String addr = address.getText().toString();
+        //now try to get the token
+        viewModel.setupTokens(addr);
     }
 
     private void onSave() {
@@ -141,7 +160,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
-        /*if (TextUtils.isEmpty(symbol)) {
+        if (TextUtils.isEmpty(symbol)) {
             symbolLayout.setError(getString(R.string.error_field_required));
             isValid = false;
         }
@@ -156,7 +175,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         } catch (NumberFormatException ex) {
             decimalsLayout.setError(getString(R.string.error_must_numeric));
             isValid = false;
-        }*/
+        }
 
         if (!Address.isAddress(address)) {
             addressLayout.setError(getString(R.string.error_invalid_address));

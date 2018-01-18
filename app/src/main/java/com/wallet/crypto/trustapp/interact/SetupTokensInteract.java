@@ -5,6 +5,7 @@ package com.wallet.crypto.trustapp.interact;
  */
 
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.repository.TokenRepositoryType;
 
@@ -20,8 +21,10 @@ public class SetupTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<Token[]> update(Wallet wallet) {
-        return tokenRepository.update(wallet.address)
+    public Observable<TokenInfo> update(Wallet wallet, String address) {
+        String userAddr = null;
+        if (wallet != null) userAddr = wallet.address;
+        return tokenRepository.update(userAddr, address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

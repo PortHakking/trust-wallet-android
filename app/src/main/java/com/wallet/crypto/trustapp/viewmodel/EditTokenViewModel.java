@@ -57,7 +57,7 @@ public class EditTokenViewModel extends BaseViewModel
     public void save(String address, String symbol, int decimals) {
         //we validated the address, now try to find the required values
         addTokenInteract
-                .update(address, symbol, decimals)
+                .update(address)
                 .subscribe(this::onSaved, this::onError);
     }
 

@@ -74,21 +74,45 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token[]> update(String walletAddress)
-    {
+    public Observable<TokenInfo> update(String walletAddress, String contractAddr) {
         NetworkInfo defaultNetwork = ethereumNetworkRepository.getDefaultNetwork();
-        Wallet wallet = new Wallet(walletAddress);
-        return setupTokensFromLocal(defaultNetwork, wallet).toObservable();
-//        return Single.merge(
-//                setupTokensFromLocal(defaultNetwork, wallet)
-//                updateTokenInfoCache(defaultNetwork, wallet))
-//                .toObservable();
+        //Wallet wallet = new Wallet(walletAddress);
+        //return tokenLocalSource.fetch(defaultNetwork, wallet)
+        //        .map(items -> getTokenDetails(wallet, contractAddr));
+        return setupTokensFromLocal(defaultNetwork, contractAddr).toObservable();
     }
 
-    private Single<Token[]> setupTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
-        return tokenLocalSource.fetch(defaultNetwork, wallet)
-                .map(items -> getTokenDetails(wallet, items));
+    public Single<TokenInfo> setupTokensFromLocal(NetworkInfo networkInfo, String address)
+    {
+        return Single.fromCallable(() -> {
+            try {
+                   TokenInfo result = new TokenInfo(
+                                address,
+                                getName(address),
+                                getSymbol(address),
+                                getDecimals(address));
+
+                return result;
+            } finally {
+
+            }
+        });
     }
+
+//    private Single<TokenInfo[]> setupTokensFromLocal(NetworkInfo defaultNetwork, String contractAddr) {
+//        return tokenLocalSource.fetch(defaultNetwork, null)
+//                .map(items -> getTokenDetails(contractAddr));
+//    }
+
+//    private Single<Token[]> setupTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet, String contractAddr) {
+//        return tokenLocalSource.fetch(defaultNetwork, wallet)
+//                .map(items -> getTokenDetails(wallet, items));
+//    }
+
+//    private Single<Token[]> setupTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet, String contractAddr) {
+//        return tokenLocalSource.fetch(defaultNetwork, wallet)
+//                .map(items -> getTokenDetails(wallet, items));
+//    }
 
     private Single<Token[]> fetchTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
         return tokenLocalSource.fetch(defaultNetwork, wallet)
@@ -113,26 +137,48 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    private Token[] getTokenDetails(Wallet wallet, TokenInfo[] items) {
-        int len = items.length;
-        Token[] result = new Token[len];
-        for (int i = 0; i < len; i++) {
-            BigDecimal balance = null;
-            String name = null;
-            String symbol = null;
-            int decimals = 18;
-            try {
-                balance = getBalance(wallet, items[i]);
-                name = getName(wallet, items[i]);
-                symbol = getSymbol(wallet, items[i]);
-                decimals = getDecimals(wallet, items[i]);
-            } catch (Exception e1) {
-                Log.d("TOKEN", "Err", e1);
-                                    /* Quietly */
-            }
-            TokenInfo t = new TokenInfo(items[i].address, name, symbol, decimals);
-            result[i] = new Token(t, balance);
+//    private Token[] getTokenDetails(Wallet wallet, TokenInfo[] items) {
+//        int len = items.length;
+//        Token[] result = new Token[len];
+//        for (int i = 0; i < len; i++) {
+//            BigDecimal balance = null;
+//            String name = null;
+//            String symbol = null;
+//            int decimals = 18;
+//            try {
+//                balance = getBalance(wallet, items[i]);
+//                name = getName(wallet, items[i]);
+//                symbol = getSymbol(wallet, items[i]);
+//                decimals = getDecimals(wallet, items[i]);
+//            } catch (Exception e1) {
+//                Log.d("TOKEN", "Err", e1);
+//                                    /* Quietly */
+//            }
+//            TokenInfo t = new TokenInfo(items[i].address, name, symbol, decimals);
+//            result[i] = new Token(t, balance);
+//        }
+//        return result;
+//    }
+
+    private TokenInfo[] getTokenDetails(String address)
+    {
+        TokenInfo[] result = new TokenInfo[1];
+        String name = null;
+        String symbol = null;
+        int decimals = 18;
+        try
+        {
+            name = getName(address);
+            symbol = getSymbol(address);
+            decimals = getDecimals(address);
         }
+        catch (Exception e1)
+        {
+            Log.d("TOKEN", "Err", e1);
+                                    /* Quietly */
+        }
+        result[0] = new TokenInfo(address, name, symbol, decimals);
+
         return result;
     }
 
@@ -145,12 +191,21 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable updateToken(Wallet wallet, String address, String symbol, int decimals) {
+    public Completable updateToken(Wallet wallet, String address)
+    {
         return tokenLocalSource.update(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
-                new TokenInfo(address, "", symbol, decimals));
+                new TokenInfo(address, "", "", 0));
     }
+
+//    @Override
+//    public Completable updateToken(Wallet wallet, String address, String symbol, int decimals) {
+//        return tokenLocalSource.update(
+//                ethereumNetworkRepository.getDefaultNetwork(),
+//                wallet,
+//                new TokenInfo(address, "", symbol, decimals));
+//    }
 
     private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo defaultNetwork, @NonNull Wallet wallet) {
         return Single.fromObservable(tokenNetworkService.fetch(wallet.address))
@@ -171,9 +226,9 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private String getName(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+    private String getName(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = nameOf();
-        String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
+        String responseValue = callSmartContractFunction(function, address, null);
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -184,9 +239,9 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private String getSymbol(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+    private String getSymbol(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = symbolOf();
-        String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
+        String responseValue = callSmartContractFunction(function, address, null);
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -197,14 +252,13 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private int getDecimals(Wallet wallet, TokenInfo tokenInfo) throws Exception {
+    private int getDecimals(String address) throws Exception {
         org.web3j.abi.datatypes.Function function = decimalsOf();
-        String responseValue = callSmartContractFunction(function, tokenInfo.address, wallet);
+        String responseValue = callSmartContractFunction(function, address, null);
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
-            //return (int)response.get(0).getValue();
             return ((Uint8) response.get(0)).getValue().intValue();
         } else {
             return 18; //default
@@ -239,9 +293,14 @@ public class TokenRepository implements TokenRepositoryType {
     private String callSmartContractFunction(
             org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
+        String userAddr = null;
+        if (wallet != null)
+        {
+            userAddr = wallet.address;
+        }
 
         org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
-                Transaction.createEthCallTransaction(wallet.address, contractAddress, encodedFunction),
+                Transaction.createEthCallTransaction(userAddr, contractAddress, encodedFunction),
                 DefaultBlockParameterName.LATEST)
                 .sendAsync().get();
 

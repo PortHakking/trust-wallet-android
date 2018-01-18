@@ -37,7 +37,8 @@ public class RealmTokenSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet) {
+    public Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet)
+    {
         return Single.fromCallable(() -> {
             Realm realm = null;
             try {
@@ -65,6 +66,36 @@ public class RealmTokenSource implements TokenLocalSource {
             }
         });
     }
+
+//    @Override
+//    public Single<TokenInfo[]> fetch(NetworkInfo networkInfo, Wallet wallet) {
+//        return Single.fromCallable(() -> {
+//            Realm realm = null;
+//            try {
+//                realm = getRealmInstance(networkInfo, wallet);
+//                RealmResults<RealmTokenInfo> realmItems = realm.where(RealmTokenInfo.class)
+//                        .sort("addedTime", Sort.ASCENDING)
+//                        .findAll();
+//                int len = realmItems.size();
+//                TokenInfo[] result = new TokenInfo[len];
+//                for (int i = 0; i < len; i++) {
+//                    RealmTokenInfo realmItem = realmItems.get(i);
+//                    if (realmItem != null) {
+//                        result[i] = new TokenInfo(
+//                                realmItem.getAddress(),
+//                                realmItem.getName(),
+//                                realmItem.getSymbol(),
+//                                realmItem.getDecimals());
+//                    }
+//                }
+//                return result;
+//            } finally {
+//                if (realm != null) {
+//                    realm.close();
+//                }
+//            }
+//        });
+//    }
 
     private Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
         RealmConfiguration config = new RealmConfiguration.Builder()

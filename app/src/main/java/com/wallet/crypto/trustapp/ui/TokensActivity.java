@@ -81,18 +81,7 @@ public class TokensActivity extends BaseActivity implements View.OnClickListener
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.wallet().setValue(getIntent().getParcelableExtra(WALLET));
 
-        String setupToken = "SETUPTOKEN";
-
-        if (getIntent().hasExtra(setupToken))
-        {
-            Uri i = getIntent().getParcelableExtra(setupToken);
-            if (i != null && i.toString().equals("setup"))
-            {
-                viewModel.setupTokens();
-            }
-        }
-
-        refreshLayout.setOnRefreshListener(viewModel::setupTokens);
+        refreshLayout.setOnRefreshListener(viewModel::fetchTokens);
     }
 
     @Override

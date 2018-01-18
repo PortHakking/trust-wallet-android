@@ -6,6 +6,7 @@ import android.content.Context;
 
 import com.wallet.crypto.trustapp.entity.NetworkInfo;
 import com.wallet.crypto.trustapp.entity.Token;
+import com.wallet.crypto.trustapp.entity.TokenInfo;
 import com.wallet.crypto.trustapp.entity.Wallet;
 import com.wallet.crypto.trustapp.interact.AddTokenInteract;
 import com.wallet.crypto.trustapp.interact.FetchTokensInteract;
@@ -20,6 +21,8 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
 
+    private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
+
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final AddTokenInteract addTokenInteract;
@@ -27,6 +30,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MyTokensRouter myTokensRouter;
 
     private final MutableLiveData<Boolean> result = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> update = new MutableLiveData<>();
 
     AddTokenViewModel(
             AddTokenInteract addTokenInteract,
@@ -41,6 +45,10 @@ public class AddTokenViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
 
+    public MutableLiveData<Wallet> wallet() {
+        return wallet;
+    }
+
     public void save(String address, String symbol, int decimals) {
         addTokenInteract
                 .add(address, symbol, decimals)
@@ -52,13 +60,13 @@ public class AddTokenViewModel extends BaseViewModel {
         result.postValue(true);
     }
 
-    public void setupTokens() {
+    public void setupTokens(String addr) {
         progress.postValue(true);
         if (defaultNetwork.getValue() == null) {
             findDefaultNetwork();
         }
         disposable = setupTokensInteract
-                .update(wallet.getValue())
+                .update(wallet.getValue(), addr)
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
     }
 
@@ -76,24 +84,32 @@ public class AddTokenViewModel extends BaseViewModel {
         return result;
     }
 
+    public LiveData<Boolean> update() {
+        return update;
+    }
+
     public void showTokens(Context context) {
         findDefaultWalletInteract
                 .find()
                 .subscribe(w -> myTokensRouter.open(context, w), this::onError);
     }
 
-    private void onTokensSetup(Token[] tokens) {
-        this.tokens.setValue(tokens);
+    private void onTokensSetup(TokenInfo tokenData) {
+        tokenInfo.setValue(tokenData);
     }
 
     private void onFetchTokensCompletable() {
         progress.postValue(false);
-        Token[] tokens = tokens().getValue();
-        //Token[] tokens = tokens().getValue();
+        update.postValue(true);
 
+        Token[] tokens = tokens().getValue();
     }
 
     public LiveData<Token[]> tokens() {
         return tokens;
+    }
+
+    public LiveData<TokenInfo> tokenInfo() {
+        return tokenInfo;
     }
 }
