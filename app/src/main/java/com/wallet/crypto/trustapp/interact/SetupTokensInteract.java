@@ -21,10 +21,8 @@ public class SetupTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<TokenInfo> update(Wallet wallet, String address) {
-        String userAddr = null;
-        if (wallet != null) userAddr = wallet.address;
-        return tokenRepository.update(userAddr, address)
+    public Observable<TokenInfo> update(String address) {
+        return tokenRepository.update(address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

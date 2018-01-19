@@ -20,7 +20,6 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
-
     private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -66,7 +65,7 @@ public class AddTokenViewModel extends BaseViewModel {
             findDefaultNetwork();
         }
         disposable = setupTokensInteract
-                .update(wallet.getValue(), addr)
+                .update(addr)
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
     }
 
@@ -101,12 +100,6 @@ public class AddTokenViewModel extends BaseViewModel {
     private void onFetchTokensCompletable() {
         progress.postValue(false);
         update.postValue(true);
-
-        Token[] tokens = tokens().getValue();
-    }
-
-    public LiveData<Token[]> tokens() {
-        return tokens;
     }
 
     public LiveData<TokenInfo> tokenInfo() {

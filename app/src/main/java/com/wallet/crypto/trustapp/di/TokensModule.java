@@ -24,16 +24,14 @@ class TokensModule {
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
             TransactionsRouter transactionsRouter,
-            EditTokenRouter editTokenRouter,
-            SetupTokensInteract setupTokensInteract) {
+            EditTokenRouter editTokenRouter) {
         return new TokensViewModelFactory(
                 findDefaultNetworkInteract,
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
                 transactionsRouter,
-                editTokenRouter,
-                setupTokensInteract);
+                editTokenRouter);
     }
 
     @Provides

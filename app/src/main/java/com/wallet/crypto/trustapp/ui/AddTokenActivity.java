@@ -43,7 +43,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private TextView name;
     private SystemView systemView;
     private Dialog dialog;
-    private boolean noUpdate;
+    private String lastCheck;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,6 +74,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
         viewModel.update().observe(this, this::onChecked);
+        lastCheck = "";
 
         address.addTextChangedListener(new TextWatcher()
         {
@@ -87,14 +88,10 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                 //wait until we have an ethereum address
                 String check = address.getText().toString();
                 if (check.length() > 39 && check.length() < 43) {
-                    if (!noUpdate && Address.isAddress(check)) {
+                    if (check != lastCheck && Address.isAddress(check)) {
                         //let's check the address here - see if we have an eth token
+                        lastCheck = check; // don't get caught in a loop
                         onCheck();
-                        noUpdate = true;
-                    }
-                    else
-                    {
-                        noUpdate = false;
                     }
                 }
             }
@@ -116,7 +113,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private void onChecked(boolean result) {
         if (result) {
             TokenInfo token = viewModel.tokenInfo().getValue();
-
             address.setText(token.address);
             symbol.setText(token.symbol);
             decimals.setText(String.valueOf(token.decimals));
@@ -144,7 +140,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onCheck() {
         String addr = address.getText().toString();
-        //now try to get the token
         viewModel.setupTokens(addr);
     }
 

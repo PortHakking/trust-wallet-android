@@ -25,7 +25,6 @@ public class TokensViewModel extends BaseViewModel {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final SetupTokensInteract setupTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final TransactionsRouter transactionsRouter;
@@ -37,15 +36,13 @@ public class TokensViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             SendTokenRouter sendTokenRouter,
             TransactionsRouter transactionsRouter,
-            EditTokenRouter editTokenRouter,
-            SetupTokensInteract setupTokensInteract) {
+            EditTokenRouter editTokenRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.transactionsRouter = transactionsRouter;
         this.editTokenRouter = editTokenRouter;
-        this.setupTokensInteract = setupTokensInteract;
     }
 
     public void prepare() {
@@ -85,16 +82,6 @@ public class TokensViewModel extends BaseViewModel {
                 .fetch(wallet.getValue())
                 .subscribe(this::onTokens, this::onError, this::onFetchTokensCompletable);
     }
-
-//    public void setupTokens() {
-//        progress.postValue(true);
-//        if (defaultNetwork.getValue() == null) {
-//            findDefaultNetwork();
-//        }
-//        disposable = setupTokensInteract
-//                .update(wallet.getValue())
-//                .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
-//    }
 
     private void onFetchTokensCompletable() {
         progress.postValue(false);

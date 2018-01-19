@@ -16,7 +16,6 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final SetupTokensInteract setupTokensInteract;
     private final AddTokenRouter addTokenRouter;
     private final SendTokenRouter sendTokenRouter;
     private final TransactionsRouter transactionsRouter;
@@ -27,15 +26,13 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                                   AddTokenRouter addTokenRouter,
                                   SendTokenRouter sendTokenRouter,
                                   TransactionsRouter transactionsRouter,
-                                  EditTokenRouter editTokenRouter,
-                                  SetupTokensInteract setupTokensInteract) {
+                                  EditTokenRouter editTokenRouter) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.transactionsRouter = transactionsRouter;
         this.editTokenRouter = editTokenRouter;
-        this.setupTokensInteract = setupTokensInteract;
     }
 
     @NonNull
@@ -47,7 +44,6 @@ public class TokensViewModelFactory implements ViewModelProvider.Factory {
                 addTokenRouter,
                 sendTokenRouter,
                 transactionsRouter,
-                editTokenRouter,
-                setupTokensInteract);
+                editTokenRouter);
     }
 }

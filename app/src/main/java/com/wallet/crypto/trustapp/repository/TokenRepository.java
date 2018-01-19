@@ -25,7 +25,6 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.Uint;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -74,45 +73,28 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<TokenInfo> update(String walletAddress, String contractAddr) {
-        NetworkInfo defaultNetwork = ethereumNetworkRepository.getDefaultNetwork();
-        //Wallet wallet = new Wallet(walletAddress);
-        //return tokenLocalSource.fetch(defaultNetwork, wallet)
-        //        .map(items -> getTokenDetails(wallet, contractAddr));
-        return setupTokensFromLocal(defaultNetwork, contractAddr).toObservable();
+    public Observable<TokenInfo> update(String contractAddr) {
+        return setupTokensFromLocal(contractAddr).toObservable();
     }
 
-    public Single<TokenInfo> setupTokensFromLocal(NetworkInfo networkInfo, String address)
+    private Single<TokenInfo> setupTokensFromLocal(String address)
     {
         return Single.fromCallable(() -> {
-            try {
-                   TokenInfo result = new TokenInfo(
-                                address,
-                                getName(address),
-                                getSymbol(address),
-                                getDecimals(address));
+            try
+            {
+                TokenInfo result = new TokenInfo(
+                        address,
+                        getName(address),
+                        getSymbol(address),
+                        getDecimals(address));
 
                 return result;
-            } finally {
+            }
+            finally {
 
             }
         });
     }
-
-//    private Single<TokenInfo[]> setupTokensFromLocal(NetworkInfo defaultNetwork, String contractAddr) {
-//        return tokenLocalSource.fetch(defaultNetwork, null)
-//                .map(items -> getTokenDetails(contractAddr));
-//    }
-
-//    private Single<Token[]> setupTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet, String contractAddr) {
-//        return tokenLocalSource.fetch(defaultNetwork, wallet)
-//                .map(items -> getTokenDetails(wallet, items));
-//    }
-
-//    private Single<Token[]> setupTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet, String contractAddr) {
-//        return tokenLocalSource.fetch(defaultNetwork, wallet)
-//                .map(items -> getTokenDetails(wallet, items));
-//    }
 
     private Single<Token[]> fetchTokensFromLocal(NetworkInfo defaultNetwork, Wallet wallet) {
         return tokenLocalSource.fetch(defaultNetwork, wallet)
@@ -137,51 +119,6 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-//    private Token[] getTokenDetails(Wallet wallet, TokenInfo[] items) {
-//        int len = items.length;
-//        Token[] result = new Token[len];
-//        for (int i = 0; i < len; i++) {
-//            BigDecimal balance = null;
-//            String name = null;
-//            String symbol = null;
-//            int decimals = 18;
-//            try {
-//                balance = getBalance(wallet, items[i]);
-//                name = getName(wallet, items[i]);
-//                symbol = getSymbol(wallet, items[i]);
-//                decimals = getDecimals(wallet, items[i]);
-//            } catch (Exception e1) {
-//                Log.d("TOKEN", "Err", e1);
-//                                    /* Quietly */
-//            }
-//            TokenInfo t = new TokenInfo(items[i].address, name, symbol, decimals);
-//            result[i] = new Token(t, balance);
-//        }
-//        return result;
-//    }
-
-    private TokenInfo[] getTokenDetails(String address)
-    {
-        TokenInfo[] result = new TokenInfo[1];
-        String name = null;
-        String symbol = null;
-        int decimals = 18;
-        try
-        {
-            name = getName(address);
-            symbol = getSymbol(address);
-            decimals = getDecimals(address);
-        }
-        catch (Exception e1)
-        {
-            Log.d("TOKEN", "Err", e1);
-                                    /* Quietly */
-        }
-        result[0] = new TokenInfo(address, name, symbol, decimals);
-
-        return result;
-    }
-
     @Override
     public Completable addToken(Wallet wallet, String address, String symbol, int decimals) {
         return tokenLocalSource.put(
@@ -191,21 +128,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Completable updateToken(Wallet wallet, String address)
-    {
+    public Completable updateToken(Wallet wallet, String address) {
         return tokenLocalSource.update(
                 ethereumNetworkRepository.getDefaultNetwork(),
                 wallet,
                 new TokenInfo(address, "", "", 0));
     }
-
-//    @Override
-//    public Completable updateToken(Wallet wallet, String address, String symbol, int decimals) {
-//        return tokenLocalSource.update(
-//                ethereumNetworkRepository.getDefaultNetwork(),
-//                wallet,
-//                new TokenInfo(address, "", symbol, decimals));
-//    }
 
     private Single<Token[]> updateTokenInfoCache(@NonNull NetworkInfo defaultNetwork, @NonNull Wallet wallet) {
         return Single.fromObservable(tokenNetworkService.fetch(wallet.address))
@@ -293,11 +221,7 @@ public class TokenRepository implements TokenRepositoryType {
     private String callSmartContractFunction(
             org.web3j.abi.datatypes.Function function, String contractAddress, Wallet wallet) throws Exception {
         String encodedFunction = FunctionEncoder.encode(function);
-        String userAddr = null;
-        if (wallet != null)
-        {
-            userAddr = wallet.address;
-        }
+        String userAddr = (wallet == null ? null : wallet.address);
 
         org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
                 Transaction.createEthCallTransaction(userAddr, contractAddress, encodedFunction),

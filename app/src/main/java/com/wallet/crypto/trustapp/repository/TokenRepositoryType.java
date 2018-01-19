@@ -10,7 +10,7 @@ import io.reactivex.Observable;
 public interface TokenRepositoryType {
 
     Observable<Token[]> fetch(String walletAddress);
-    Observable<TokenInfo> update(String walletAddress, String address);
+    Observable<TokenInfo> update(String address);
 
     Completable addToken(Wallet wallet, String address, String symbol, int decimals);
     Completable updateToken(Wallet wallet, String address);
