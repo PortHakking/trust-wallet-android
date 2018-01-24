@@ -167,7 +167,20 @@ public class TransactionsViewModel extends BaseViewModel {
         settingsRouter.open(context);
     }
 
-    public void showSend(Context context) { sendRouter.open(context, defaultNetwork.getValue().symbol); }
+    public void showSend(Context context) {
+        //balance of token
+        String balanceStr = defaultWalletBalance.getValue().get(defaultNetwork.getValue().symbol);
+        double balance = 0;
+        if (balanceStr != null && balanceStr.length() > 0) {
+            try {
+                balance = Double.parseDouble(balanceStr);
+            } catch (Exception e) {
+
+            }
+        }
+
+        sendRouter.open(context, defaultNetwork.getValue().symbol, balance);
+    }
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);

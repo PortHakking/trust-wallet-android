@@ -9,14 +9,17 @@ import android.support.design.widget.TextInputLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
+import com.wallet.crypto.trustapp.entity.GasSettings;
 import com.wallet.crypto.trustapp.ui.barcode.BarcodeCaptureActivity;
 import com.wallet.crypto.trustapp.util.BalanceUtils;
 import com.wallet.crypto.trustapp.util.QRURLParser;
@@ -25,7 +28,9 @@ import com.wallet.crypto.trustapp.viewmodel.SendViewModelFactory;
 
 import org.ethereum.geth.Address;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 
 import javax.inject.Inject;
 
@@ -46,9 +51,15 @@ public class SendActivity extends BaseActivity {
     private boolean sendingTokens = false;
     private String contractAddress;
     private int decimals;
+    private double balance;
     private String symbol;
     private TextInputLayout toInputLayout;
     private TextInputLayout amountInputLayout;
+    private TextView viewBalance;
+    private Button addAll;
+
+    private boolean confirmationForTokenTransfer = false;
+    private double networkFee = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,12 +77,18 @@ public class SendActivity extends BaseActivity {
         toAddressText = findViewById(R.id.send_to_address);
         amountInputLayout = findViewById(R.id.amount_input_layout);
         amountText = findViewById(R.id.send_amount);
+        viewBalance = findViewById(R.id.textViewBalance);
+        addAll = findViewById(R.id.buttonAll);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
+        balance = getIntent().getDoubleExtra(C.EXTRA_AMOUNT, 0);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
+
+        String balanceStatement = String.valueOf(balance) + " " + symbol;
+        viewBalance.setText(balanceStatement);
 
         setTitle(getString(R.string.title_send) + " " + symbol);
         amountInputLayout.setHint(getString(R.string.hint_amount) + " " + symbol);
@@ -87,6 +104,9 @@ public class SendActivity extends BaseActivity {
             Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
             startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
+
+        viewModel.gasSettings().observe(this, this::onGasSettings);
+        addAll.setOnClickListener(view -> addMax());
     }
 
     @Override
@@ -105,6 +125,12 @@ public class SendActivity extends BaseActivity {
             break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.prepare(confirmationForTokenTransfer);
     }
 
     @Override
@@ -130,6 +156,22 @@ public class SendActivity extends BaseActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void onGasSettings(GasSettings gasSettings) {
+        networkFee = BalanceUtils.weiToEth(gasSettings
+                .gasPrice.multiply(gasSettings.gasLimit)).doubleValue();
+
+        DecimalFormat format = new DecimalFormat("###.0000#");
+
+        double maxTransfer = balance - networkFee;
+        String balanceStatement = "Max " + format.format(maxTransfer) + " " + symbol;
+        viewBalance.setText(balanceStatement);
+    }
+
+    private void addMax() {
+        double maxTransfer = balance - networkFee;
+        amountText.setText(String.valueOf(maxTransfer));
     }
 
     private void onNext() {

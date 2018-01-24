@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
 import com.wallet.crypto.trustapp.C;
 import com.wallet.crypto.trustapp.R;
 import com.wallet.crypto.trustapp.entity.ErrorEnvelope;
@@ -35,13 +34,10 @@ import com.wallet.crypto.trustapp.viewmodel.TransactionsViewModelFactory;
 import com.wallet.crypto.trustapp.widget.DepositView;
 import com.wallet.crypto.trustapp.widget.EmptyTransactionsView;
 import com.wallet.crypto.trustapp.widget.SystemView;
-
+import java.math.BigDecimal;
 import java.util.Map;
-
 import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
-
 import static com.wallet.crypto.trustapp.C.ETHEREUM_NETWORK_NAME;
 import static com.wallet.crypto.trustapp.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -54,6 +50,8 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
     private SystemView systemView;
     private TransactionsAdapter adapter;
     private Dialog dialog;
+
+    private boolean isBalanceEmpty;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -193,6 +191,13 @@ public class TransactionsActivity extends BaseNavigationActivity implements View
         } else {
             actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
             actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
+
+            if (new BigDecimal(balance.get(C.USD_SYMBOL)).compareTo(BigDecimal.ZERO) == 0) {
+                isBalanceEmpty = true;
+            } else {
+                isBalanceEmpty = false;
+            }
+
         }
     }
 
